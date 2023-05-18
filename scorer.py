@@ -1,0 +1,75 @@
+import os
+import re
+import numpy as np
+import torch
+
+directory_in_str = '/usr01/taku/checkpoint/honda/best/vanilla/'
+directory_in_str2 = '/usr01/taku/checkpoint/honda/best/crf/'
+
+def dd(directory_in_str):
+    directory = os.fsencode(directory_in_str)
+    filepaths = [] # 获取文件路径
+    filenames = [] # 文件名
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        filenames.append(filename)
+        filepaths.append(f'{directory_in_str}{filename}')
+    # TODO: 匹配 VANILLA_RP?_DS{ds_idx}_* 
+    # TODO: 读取checkpoint然后计算平均f, prec, rec
+    fs5 = []
+    precs5 = []
+    recs5 = []   
+    for dataset_index in range(5):
+        fs = []
+        precs = []
+        recs = []
+        print(f'dataset_index: {dataset_index}')
+        for name, path in zip(filenames, filepaths): # 遍历, 无所谓，只是15个文件名字符串处理而已
+            pattern = f'.*?_RP._DS{dataset_index}_.*'
+            if len(re.findall(pattern, name)) > 0:
+                print(f'load: {name}')
+                checkpoint = torch.load(path)
+                prec, rec, f, _ = checkpoint['score']['test']
+                fs.append(f)
+                precs.append(prec)
+                recs.append(rec)
+        fs5.append(fs)
+        precs5.append(precs)
+        recs5.append(recs)
+    return precs5, recs5, fs5
+
+
+
+directory = '/usr01/taku/checkpoint/honda/'
+
+def dd2(directory_in_str):
+    directory = os.fsencode(directory_in_str)
+    filepaths = [] # 获取文件路径
+    filenames = [] # 文件名
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        filenames.append(filename)
+        filepaths.append(f'{directory_in_str}{filename}')
+    res = np.zeros((5, 2, 3))
+    for dataset_index in range(5):
+        for type_index, type_name in enumerate(['CRF','NORMAL']):
+            for repeat_index in range(3):
+            # TODO: 找到性能最高的checkpoint
+                best_dev = 0
+                the_test = 0
+                the_name = ''
+                for name, path in zip(filenames, filepaths): # 遍历, 无所谓，只是15个文件名字符串处理而已
+                    pattern = f'{type_name}_RP{repeat_index}_DS{dataset_index}_.*'
+                    if len(re.findall(pattern, name)) > 0: # 不同step的处理，根据文件名读取数字
+                        dev = float(re.findall('dev(0\.?\d*)', name)[0])
+                        if dev > best_dev:
+                            the_name = name
+                            best_dev = dev
+                            test = float(re.findall('test(0\.?\d*)', name)[0])
+                            if test < the_test:
+                                print(f'! {test} is smaller than {the_test}')
+                            the_test = test
+                print(the_name)
+                res[dataset_index, type_index, repeat_index] = the_test
+    return res
+

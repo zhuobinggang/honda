@@ -1,0 +1,52 @@
+使い方
+学習/予測したいデータを、訓練データをtrain.txt、テストデータをtest.txtとし、同じディレクトリに入れる。data_fiveやMilesのように
+使用するディレクトリを変更する際はdata_reader.py、main.py、main_crf.pyのpath部分の記述を都度変更する。
+以上の作業をした上で以下をターミナルに入力
+
+python3
+>>> from main_crf import *
+>>> import numpy as np
+
+>>> result_no_crf, result_with_crf = run_experiment()
+>>> result_no_crf = np.array(result_no_crf)
+>>> result_with_crf = np.array(result_with_crf)
+
+結果を格納したファイルがwith_crf.txt(BERT+CRF)、without_crf.txt(BERT)として出力される。
+
+学習データの強調箇所の割合を調べる方法
+
+>>> from main_crf import *
+>>> label_count, label_one = cal_label_percent()
+>>> print(label_one / label_count)
+プロンプトに割合が数値として表示される
+
+確信度を見る方法
+>>> result_no_crf_raw, result_with_crf_raw = run_experiment_get_raw_output()
+確信度の値を格納したファイルがwith_crf_raw.txt(BERT+CRF)、without_crf_raw.txt(BERT)として出力される。
+
+ディレクトリ
+IB:2012年3月の実験でI-STRONGとB-STRONGをSTRONGに統一していないデータ
+
+Matono:著者2の実験用データ
+
+Miles:著者1の実験用データ
+
+data_five:2012年3月一ヶ月分の実験用データ
+
+m1:学習データ1ヶ月分の実験用データ
+
+m2:学習データ2ヶ月分の実験用データ
+
+m4:学習データ4ヶ月分の実験用データ
+
+m8:学習データ8ヶ月分の実験用データ
+
+m16:学習データ16ヶ月分の実験用データ
+
+monooki:データバックアップ用
+
+probability:適合率と再現率を一致させるため確信度調整を行うためのプログラムなど。調整した結果もある
+
+random:複数著者の実験用データ
+
+result:出力保管用ディレクトリ
