@@ -25,7 +25,8 @@ def readfile(filename):
     return data
 
 
-test_filename = 'data_five/1/test.txt'
+############## 使用标题情报
+
 def readfile_with_title_info(filename):
     '''
     read file
@@ -54,3 +55,16 @@ def readfile_with_title_info(filename):
         sentence = []
         label = []
     return data
+
+def label_to_number(case):
+    tokens, labels, is_title = case
+    # tokens = ''.join(tokens)
+    numbers = [1 if label != 'O' else 0 for label in labels]
+    return tokens, numbers, is_title
+
+def read_ds(name = 'data_five/1/test.txt'):
+    data = readfile_with_title_info(name)
+    data = [label_to_number(case) for case in data]
+    return data
+
+

@@ -42,6 +42,8 @@ def dd(directory_in_str):
 
 directory = '/usr01/taku/checkpoint/honda/'
 
+
+# NOTE: 不需要手动，也不需要实际上加载checkpoint
 def dd2(directory_in_str):
     directory = os.fsencode(directory_in_str)
     filepaths = [] # 获取文件路径

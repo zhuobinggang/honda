@@ -40,12 +40,10 @@ class Sector_CRF(Sector_2022_CRF):
 def encode_plus(tokens, toker):
     ids_expand = []
     head_indexs = []
-    start_index = 0
     for token in tokens:
-        head_indexs.append(start_index)
+        head_indexs.append(len(ids_expand))
         ids = toker.encode(token, add_special_tokens = False)
         ids_expand += ids
-        start_index += len(ids)
     # Special Token
     ids_expand = [2] + ids_expand + [3]
     head_indexs = [idx + 1 for idx in head_indexs]
