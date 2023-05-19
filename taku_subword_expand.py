@@ -14,7 +14,8 @@ def save_checkpoint(name, model, step, score_dev, score_test):
             }, PATH)
 
 class Sector(Sector_2022):
-    def forward(self, tokens):
+    def forward(self, item):
+        tokens, _ = item
         ids, heads = encode_plus(tokens, self.toker)
         assert len(heads) == len(tokens)
         # (1, seq_len + 2, 768)
@@ -25,7 +26,8 @@ class Sector(Sector_2022):
         return out_mlp
 
 class Sector_CRF(Sector_2022_CRF):
-    def forward(self, tokens):
+    def forward(self, item):
+        tokens, _ = item
         ids, heads = encode_plus(tokens, self.toker)
         assert len(heads) == len(tokens)
         # (1, seq_len + 2, 768)

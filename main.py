@@ -128,7 +128,15 @@ class Sector_2022(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, tokens):
+    def get_labels_from_input(self, item):
+        tokens, labels = item
+        return labels
+    def get_tokens_from_input(self, item):
+        tokens, labels = item
+        return tokens
+
+    def forward(self, item):
+        tokens = self.get_tokens_from_input(item)
         ids = encode(tokens, self.toker)
         assert ids.shape[0] == len(tokens) + 2
         # (1, seq_len + 2, 768)
@@ -138,18 +146,19 @@ class Sector_2022(nn.Module):
         out_mlp = out_mlp.view(-1)  # (seq_len)
         return out_mlp
 
-    def loss(self, tokens, labels):
-        out_mlp = self.forward(tokens)  # (seq_len)
-        labels = t.FloatTensor(labels).cuda()  # (seq_len)
+    def loss(self, item):
+        tokens, labels = item
+        out_mlp = self.forward(item)  # (seq_len)
+        labels = t.FloatTensor(self.get_labels_from_input(item)).cuda()  # (seq_len)
         loss = self.BCE(out_mlp, labels)
         return loss
 
     def test(self, ds):
         target_all = []
         result_all = []
-        for tokens, labels in ds:
-            out_mlp = self.forward(tokens)  # (seq_len)
-            target_all.append(labels)
+        for item in ds:
+            out_mlp = self.forward(item)  # (seq_len)
+            target_all.append(self.get_labels_from_input(item))
             out_mlp = out_mlp.tolist()
             result_all.append(out_mlp)
         # flatten & calculate

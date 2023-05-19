@@ -2,6 +2,10 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
 def draw_line_chart(x, ys, legends, path = 'dd.png', colors = None, xlabel = None, ylabel = None):
     plt.clf()
     for i, (y, l) in enumerate(zip(ys, legends)):
@@ -180,8 +184,7 @@ def train_and_save_checkpoints(
     for step in range(total_step):
         batch_loss = []
         for _ in range(batch_size):
-            tokens, labels = ld_train.next()
-            loss = m.loss(tokens, labels)
+            loss = m.loss(ld_train.next())
             loss.backward()
             batch_loss.append(loss.item())
         loser.add(np.mean(batch_loss))

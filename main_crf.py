@@ -55,7 +55,15 @@ class Sector_2022_CRF(nn.Module):
             self.toker = BertJapaneseTokenizer.from_pretrained(
                 'cl-tohoku/bert-base-japanese-char')
 
-    def forward(self, tokens):
+    def get_labels_from_input(self, item):
+        tokens, labels = item
+        return labels
+    def get_tokens_from_input(self, item):
+        tokens, labels = item
+        return tokens
+
+    def forward(self, item):
+        tokens self.get_tokens_from_input(item)
         ids = encode(tokens, self.toker)
         assert ids.shape[0] == len(tokens) + 2
         # (1, seq_len + 2, 768)
@@ -64,18 +72,19 @@ class Sector_2022_CRF(nn.Module):
         out_mlp = self.classifier(out_bert)  # (1, seq_len, 2)
         return out_mlp
 
-    def loss(self, tokens, labels):
-        out_mlp = self.forward(tokens)  # (1, seq_len, 2)
-        tags = t.LongTensor([labels]).cuda()
+    def loss(self, item):
+        tokens, labels = item
+        out_mlp = self.forward(item)  # (1, seq_len, 2)
+        tags = t.LongTensor([self.get_labels_from_input(item)]).cuda()
         loss = -self.crf(out_mlp, tags)
         return loss
 
     def test(self, ds):
         target_all = []
         result_all = []
-        for tokens, labels in ds:
-            target_all.append(labels)
-            out_mlp = self.forward(tokens)  # (1, seq_len, 2)
+        for item in ds:
+            target_all.append(self.get_labels_from_input(item))
+            out_mlp = self.forward(item)  # (1, seq_len, 2)
             result_all.append(self.crf.decode(out_mlp)[0])
         # flatten & calculate
         results = flatten(result_all)

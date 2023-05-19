@@ -67,4 +67,15 @@ def read_ds(name = 'data_five/1/test.txt'):
     data = [label_to_number(case) for case in data]
     return data
 
+def read_tests(length=5):
+    datas = []
+    for i in range(1, 1 + length):
+        datas.append(read_ds(f'data_five/{i}/test.txt'))
+    return datas
+
+def read_trains(length=5):
+    datas = []
+    for i in range(1, 1 + length):
+        datas.append(read_ds(f'data_five/{i}/train.txt'))
+    return datas
 
