@@ -52,11 +52,11 @@ def encode_plus(tokens, toker):
     return torch.LongTensor(ids_expand), head_indexs
 
 
-def data_size_curve_5split():
+def run():
     torch.manual_seed(10)
     np.random.seed(10)
     # 5 * 10 * 2 * 400 * 3 = 120GB
-    for repeat in range(3):
+    for repeat in range(3, 10):
         for idx, (mess_train_dev, ds_test) in enumerate(zip(read_trains(), read_tests())):
             ds_train = mess_train_dev[:-500]
             ds_dev = mess_train_dev[-500:]

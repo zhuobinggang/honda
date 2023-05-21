@@ -40,11 +40,8 @@ def dd(directory_in_str):
 
 
 
-directory = '/usr01/taku/checkpoint/honda/'
-
-
 # NOTE: 不需要手动，也不需要实际上加载checkpoint
-def dd2(directory_in_str):
+def dd2(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMAL', 'CRF', 'NORMAL_TITLE','CRF_TITLE'], repeat_index_range = range(3)):
     directory = os.fsencode(directory_in_str)
     filepaths = [] # 获取文件路径
     filenames = [] # 文件名
@@ -52,10 +49,10 @@ def dd2(directory_in_str):
         filename = os.fsdecode(file)
         filenames.append(filename)
         filepaths.append(f'{directory_in_str}{filename}')
-    res = np.zeros((5, 2, 3))
+    res = np.zeros((5, 4, 3))
     for dataset_index in range(5):
-        for type_index, type_name in enumerate(['CRF','NORMAL']):
-            for repeat_index in range(3):
+        for type_index, type_name in enumerate(type_names):
+            for index_counter, repeat_index in enumerate(repeat_index_range):
             # TODO: 找到性能最高的checkpoint
                 best_dev = 0
                 the_test = 0
@@ -72,6 +69,8 @@ def dd2(directory_in_str):
                                 print(f'! {test} is smaller than {the_test}')
                             the_test = test
                 print(the_name)
-                res[dataset_index, type_index, repeat_index] = the_test
+                res[dataset_index, type_index, index_counter] = the_test
     return res
 
+
+# res = dd2(type_names = ['NORMAL_TITLE','CRF_TITLE'])

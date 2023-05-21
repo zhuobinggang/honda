@@ -147,7 +147,7 @@ class Sector_2022(nn.Module):
         return out_mlp
 
     def loss(self, item):
-        tokens, labels = item
+        labels = self.get_labels_from_input(item)
         out_mlp = self.forward(item)  # (seq_len)
         labels = t.FloatTensor(self.get_labels_from_input(item)).cuda()  # (seq_len)
         loss = self.BCE(out_mlp, labels)

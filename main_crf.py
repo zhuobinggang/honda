@@ -63,7 +63,7 @@ class Sector_2022_CRF(nn.Module):
         return tokens
 
     def forward(self, item):
-        tokens self.get_tokens_from_input(item)
+        tokens = self.get_tokens_from_input(item)
         ids = encode(tokens, self.toker)
         assert ids.shape[0] == len(tokens) + 2
         # (1, seq_len + 2, 768)
@@ -73,7 +73,6 @@ class Sector_2022_CRF(nn.Module):
         return out_mlp
 
     def loss(self, item):
-        tokens, labels = item
         out_mlp = self.forward(item)  # (1, seq_len, 2)
         tags = t.LongTensor([self.get_labels_from_input(item)]).cuda()
         loss = -self.crf(out_mlp, tags)
