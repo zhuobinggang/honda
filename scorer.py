@@ -49,7 +49,7 @@ def dd2(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMA
         filename = os.fsdecode(file)
         filenames.append(filename)
         filepaths.append(f'{directory_in_str}{filename}')
-    res = np.zeros((5, 4, 3))
+    res = np.zeros((5, len(type_names), len(repeat_index_range)))
     for dataset_index in range(5):
         for type_index, type_name in enumerate(type_names):
             for index_counter, repeat_index in enumerate(repeat_index_range):
@@ -73,4 +73,10 @@ def dd2(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMA
     return res
 
 
-# res = dd2(type_names = ['NORMAL_TITLE','CRF_TITLE'])
+############## 获取实验结果的脚本
+def script():
+    exp1 = dd2(repeat_index_range = range(0,3))
+    # NOTE: 因为种子固定的原因, 3~6得到的结果和0~3是一样的
+    exp2 = dd2(repeat_index_range = range(6,9))
+    avg = dd2(repeat_index_range = range(3,9))
+
