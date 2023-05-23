@@ -77,11 +77,11 @@ def encode_plus_title(toker, tokens, titles):
     return torch.LongTensor(ids_expand), need_indexs
 
 
-def run():
-    torch.manual_seed(10)
-    np.random.seed(10)
+def run(seed = 10, indexs = range(3, 10)):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
     # 5 * 10 * 2 * 400 * 3 = 120GB
-    for repeat in range(3, 10):
+    for repeat in indexs:
         for idx, (mess_train_dev, ds_test) in enumerate(zip(read_trains(), read_tests())):
             ds_train = mess_train_dev[:-500]
             ds_dev = mess_train_dev[-500:]
