@@ -76,7 +76,7 @@ def dd2(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMA
 ############## 获取实验结果的脚本
 def script():
     exp1 = dd2(repeat_index_range = range(0,3))
-    # NOTE: 因为种子固定的原因, 3~6得到的结果和0~3是一样的
-    exp2 = dd2(repeat_index_range = range(6,9))
-    avg = dd2(repeat_index_range = range(3,9))
+    exp2 = dd2(repeat_index_range = range(3,6))
+    exp3 = dd2(repeat_index_range = range(6,9))
+    avg = dd2(repeat_index_range = range(9))
 

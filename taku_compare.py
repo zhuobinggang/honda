@@ -24,6 +24,18 @@ def last_sentence_emphasize(ds):
                 result_all.append([0] * len(ls))
     return result_all, target_all
 
+def first_sentence_emphasize(ds):
+    target_all = []
+    result_all = []
+    for i in range(len(ds)):
+        _, ls, _, paras = ds[i]
+        target_all.append(ls)
+        if paras[0] == 1:
+            result_all.append([1] * len(ls))
+        else:
+            result_all.append([0] * len(ls))
+    return result_all, target_all
+
 
 def performance(func):
     ld = Loader()
