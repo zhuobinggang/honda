@@ -80,6 +80,5 @@ def print_last_sentence_empha():
     emphasizes, _ = last_sentence_emphasize(ds)
     texts = [print_sentence(item, empha) for item, empha in zip(ds, emphasizes)]
     return texts
-
     
 
