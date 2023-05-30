@@ -119,3 +119,13 @@ def ds_printer(ds, LENGTH = None):
     return texts
 
 
+
+# NOTE: 包含高亮
+def ds_printer(ds, LENGTH = None):
+    if not LENGTH:
+        LENGTH = len(ds)
+    texts = []
+    for i in range(LENGTH):
+        text = print_sentence(ds[i])
+        texts.append(text)
+    return texts

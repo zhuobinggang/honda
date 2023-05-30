@@ -153,6 +153,13 @@ class Sector_2022(nn.Module):
         loss = self.BCE(out_mlp, labels)
         return loss
 
+    # 和printer.py配合
+    def emphasize(self, item):
+        out_mlp = self.forward(item)  # (seq_len)
+        out_mlp = out_mlp.tolist()
+        res = [True if res > 0.5 else False for res in out_mlp]
+        return res
+
     def test(self, ds):
         target_all = []
         result_all = []

@@ -8,14 +8,17 @@ import numpy as np
 # Plan A: 让BERT处理
 class Sector_Title(Sector):
     def get_labels_from_input(self, item):
-        tokens, labels, titles = item
+        tokens, labels, titles, paras = item
         return labels
     def get_tokens_from_input(self, item):
-        tokens, labels, titles = item
+        tokens, labels, titles, paras = item
         return tokens
+    def get_titles_from_input(self, item):
+        tokens, labels, titles, paras = item
+        return titles
     def forward(self, item):
-        tokens, _, titles = item
-        ids, heads = encode_plus_title(self.toker, tokens, titles)
+        tokens = self.get_tokens_from_input(item)
+        ids, heads = encode_plus_title(self.toker, tokens, self.get_titles_from_input(item))
         assert len(heads) == len(tokens)
         # (1, seq_len + 2, 768)
         out_bert = self.bert(ids.unsqueeze(0).cuda()).last_hidden_state
