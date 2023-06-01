@@ -26,9 +26,7 @@ class Loader:
             paragraph_info.append(int(splits[-3]))
         # 收尾工作
         if len(sentence) >0:
-            data.append((sentence, label, title_word)) # 以句子为单位读取
-            sentence = []
-            label = []
+            data.append((sentence, label, title_word, paragraph_info))# 以句子为单位读取
         return data
     def count_paragraphs(self, data):
         count = 0

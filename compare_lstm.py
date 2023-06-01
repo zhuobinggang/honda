@@ -1,82 +1,137 @@
 import fasttext
+import torch
+import numpy as np
+from torch import nn
+from torch import optim
 from fugashi import Tagger
-from taku_reader import read_trains, read_tests
+from taku_reader2 import Loader
+from common import train_and_save_checkpoints, flatten, cal_prec_rec_f1_v2
 
-ft = fasttext.load_model('/home/taku/cc.ja.300.bin')
-tagger = Tagger('-Owakati')
-ds = read_tests(1)[0]
-ss, ls, titles = ds[0]
-vecs = torch.stack([torch.from_numpy(ft.get_word_vector(str(word))) for word in ss]) # (LEN, 300)
-rnn = nn.LSTM(300, 300, 1, batch_first = True)
-
-
-class BILSTM_MEAN(nn.Module):
+class BILSTM(nn.Module):
     def __init__(self, learning_rate = 1e-4):
         super().__init__()
-        self.ft = fasttext.load_model('cc.ja.300.bin')
+        self.init_all()
+        self.opter = optim.AdamW(self.parameters(), lr = learning_rate)
+    def init_all(self):
+        self.ft = fasttext.load_model('/home/taku/cc.ja.300.bin')
         self.tagger = Tagger('-Owakati')
         self.rnn = nn.LSTM(300, 300, 1, batch_first = True, bidirectional = True)
-        self.attention = nn.Sequential(
+        self.classifier = nn.Sequential(
             nn.Linear(600, 1),
-            nn.Softmax(dim = 0),
+            nn.Sigmoid()
         )
-        self.mlp = nn.Sequential(
-            nn.Linear(1200, 2),
-        )
-        self.adapter = Adapter(600, 100)
-        self.CEL = nn.CrossEntropyLoss()
+        self.BCE = nn.BCELoss()
         self.cuda()
-        self.opter = optim.AdamW(chain(self.parameters()), lr = learning_rate)
-    def forward(model, ss, ls):
-        mlp = model.mlp
-        vec_cat = model.get_pooled_output(ss, ls) # (1200)
-        out = mlp(vec_cat).unsqueeze(0) # (1, 2)
-        # loss & step
-        tar = torch.LongTensor([ls[2]]).cuda() # (1)
-        return out, tar
-    def loss(model, out ,tar):
-        return model.CEL(out, tar)
-    def create_vecs(self, text):
-        vecs = torch.stack([torch.from_numpy(self.ft.get_word_vector(str(word))) for word in self.tagger(text)]) # (?, 300)
-        vecs, (_, _) = self.rnn(vecs.cuda()) # (?, 600)
-        # NOTE: ATT
-        vecs = self.attention(vecs) * vecs
-        return vecs
-    def get_pooled_output(self, ss, ls):
-        left_vecs = self.create_vecs(combine_ss(ss[:2]))
-        right_vecs = self.create_vecs(combine_ss(ss[2:]))
-        assert len(left_vecs.shape) == 2 
-        assert left_vecs.shape[1] == 600
-        # Mean
-        left_vec = left_vecs.mean(dim = 0) # (600)
-        right_vec = right_vecs.mean(dim = 0) # (600)
-        vec_cat = torch.cat((left_vec.squeeze(), right_vec.squeeze())) # (1200)
-        return vec_cat
+    def get_titles_from_input(self, item):
+        tokens, labels, titles, paras = item
+        return titles
+    def get_labels_from_input(self, item):
+        tokens, labels, titles, paras = item
+        return labels
+    def get_tokens_from_input(self, item):
+        tokens, labels, titles, paras = item
+        return tokens
+    def forward(self, item):
+        tokens = self.get_tokens_from_input(item)
+        out_ft = torch.stack([torch.from_numpy(self.ft.get_word_vector(str(word))) for word in tokens]).cuda() # (seq_len, 300)
+        out_rnn, (_, _) = self.rnn(out_ft.cuda()) # (?, 600)
+        out_mlp = self.classifier(out_rnn)  # (seq_len, 1)
+        out_mlp = out_mlp.view(-1)  # (seq_len)
+        return out_mlp
+    def loss(self, item):
+        labels = self.get_labels_from_input(item)
+        out_mlp = self.forward(item)  # (seq_len)
+        labels = torch.FloatTensor(self.get_labels_from_input(item)).cuda()  # (seq_len)
+        loss = self.BCE(out_mlp, labels)
+        return loss
+    # 和printer.py配合
+    def emphasize(self, item):
+        out_mlp = self.forward(item)  # (seq_len)
+        out_mlp = out_mlp.tolist()
+        res = [True if res > 0.5 else False for res in out_mlp]
+        return res
+    def test(self, ds):
+        target_all = []
+        result_all = []
+        for item in ds:
+            out_mlp = self.forward(item)  # (seq_len)
+            target_all.append(self.get_labels_from_input(item))
+            out_mlp = out_mlp.tolist()
+            result_all.append(out_mlp)
+        # flatten & calculate
+        results = flatten(result_all)
+        results = [1 if res > 0.5 else 0 for res in results]
+        targets = flatten(target_all)
+        return cal_prec_rec_f1_v2(results, targets)
+    def opter_step(self):
+        self.opter.step()
+        self.opter.zero_grad()
+
 
 # 使用fugashi分词，然后使用fasttext获取emb，然后LSTM结合特征，最后MLP输出结果
 # 手稿
+def run(seed = 10, indexs = range(3), mtype = 0):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    ld = Loader()
+    mess_train_dev = ld.read_trains(1)[0]
+    ds_train = mess_train_dev[:-500]
+    ds_dev = mess_train_dev[-500:]
+    ds_test = ld.read_tests(1)[0]
+    if mtype == 0:
+        m = BILSTM()
+        # 5 * 10 * 2 * 400 * 3 = 120GB
+        train_and_save_checkpoints(m, f'bilstm', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+    elif mtype == 1:
+        print('bilstm title')
+        m = BILSTM_TITLE()
+        # 5 * 10 * 2 * 400 * 3 = 120GB
+        train_and_save_checkpoints(m, f'BILSTM_TITLE', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+
+def run_batch(seed = 10, indexs = range(3), mtype = 0):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    ld = Loader()
+    for repeat in indexs:
+        for idx, (mess_train_dev, ds_test) in enumerate(zip(ld.read_trains(5), ld.read_tests(5))):
+            ds_train = mess_train_dev[:-500]
+            ds_dev = mess_train_dev[-500:]
+            if mtype == 0:
+                m = BILSTM()
+                train_and_save_checkpoints(m, f'BILSTM_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+            elif mtype == 1:
+                print('BILSTM_TITLE')
+                m = BILSTM_TITLE()
+                train_and_save_checkpoints(m, f'BILSTM_TITLE_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+
 def script():
-    rnn = nn.LSTM(300, 300, 1, batch_first = True)
-    model = nn.Sequential(
-        nn.Linear(600, 2),
-    )
-    CEL = nn.CrossEntropyLoss()
-    opter = optim.AdamW(chain(rnn.parameters(), model.parameters()), lr = 1e-3)
-    tagger = Tagger('-Owakati')
-    ld_train = loader.news.train()
-    np.random.seed(10)
-    np.random.shuffle(ld_train)
-    ss,ls = ld_train[0]
-    left = combine_ss(ss[:2])
-    right = combine_ss(ss[2:])
-    left_vecs = torch.stack([torch.from_numpy(ft.get_word_vector(str(word))) for word in tagger(left)]) # (?, 300)
-    right_vecs = torch.stack([torch.from_numpy(ft.get_word_vector(str(word))) for word in tagger(right)]) # (?, 300)
-    _, (left_vec, _) = rnn(left_vecs.unsqueeze(0)) # (1, 1, 300)
-    _, (right_vec, _) = rnn(right_vecs.unsqueeze(0)) # (1, 1, 300)
-    vec_cat = torch.cat((left_vec.squeeze(), right_vec.squeeze()))
-    out = model(vec_cat).unsqueeze(0) # (1, 2)
-    # loss & step
-    tar = torch.LongTensor([ls[2]]) # (1)
-    loss = CEL(out, tar)
+    run_batch(mtype = 0) # BILSTM
+    run_batch(mtype = 1) # BILSTM + TITLE
+
+
+################## LSTM加标题情报
+class BILSTM_TITLE(BILSTM):
+    def init_all(self):
+        self.ft = fasttext.load_model('/home/taku/cc.ja.300.bin')
+        self.tagger = Tagger('-Owakati')
+        self.rnn = nn.LSTM(302, 302, 1, batch_first = True, bidirectional = True)
+        self.classifier = nn.Sequential(
+            nn.Linear(604, 1),
+            nn.Sigmoid()
+        )
+        self.BCE = nn.BCELoss()
+        self.cuda()
+    def transfer_words(self, item):
+        tokens = self.get_tokens_from_input(item)
+        titles = self.get_titles_from_input(item)
+        out_ft = torch.stack([torch.Tensor(np.concatenate((self.ft.get_word_vector(str(word)), [0, 1] if is_title else [1, 0]))) for word, is_title in zip(tokens, titles)]).cuda()
+        return out_ft
+    def forward(self, item):
+        out_ft = self.transfer_words(item) # (seq_len, 302)
+        out_rnn, (_, _) = self.rnn(out_ft.cuda()) # (?, 604)
+        out_mlp = self.classifier(out_rnn)  # (seq_len, 1)
+        out_mlp = out_mlp.view(-1)  # (seq_len)
+        return out_mlp
+
 
 

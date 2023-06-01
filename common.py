@@ -181,6 +181,7 @@ def train_and_save_checkpoints(
     ld_train = Infinite_Dataset(ds_train.copy(), shuffle_seed = 10)
     loser = Loss_Plotter()
     score_plotter = Score_Plotter()
+    best_dev = 0
     for step in range(total_step):
         batch_loss = []
         for _ in range(batch_size):
@@ -193,7 +194,9 @@ def train_and_save_checkpoints(
             score_dev = m.test(ds_dev)
             score_test = m.test(ds_test)
             beutiful_print_result(step, score_dev, score_test)
-            save_checkpoint(name, m, step, score_dev, score_test)
+            if score_dev[2] > best_dev:
+                best_dev = score_dev[2]
+                save_checkpoint(name, m, step, score_dev, score_test)
             # Plot & Cover
             loser.plot(f'checkpoint/{name}_loss.png')
             score_plotter.add(score_dev[2], score_test[2])
