@@ -88,10 +88,10 @@ def flatten(l):
 
 
 class Sector_2022(nn.Module):
-    def __init__(self, learning_rate=2e-5, cuda=True, wholeword=True):
+    def __init__(self, learning_rate=2e-5, cuda=True, wholeword=True, last_dim = 768):
         super().__init__()
         self.learning_rate = learning_rate
-        self.bert_size = 768
+        self.bert_size = last_dim
         self.verbose = False
         self.init_bert(wholeword=wholeword)
         self.init_hook()
