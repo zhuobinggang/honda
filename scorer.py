@@ -1,3 +1,4 @@
+# NOTE: 该文件作为整理实验结果的据点
 import os
 import re
 import numpy as np
@@ -73,7 +74,7 @@ def dd2(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMA
     return res
 
 # NOTE: 加载模型，计算对应prec, recall
-def dd2_all_info(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMAL', 'CRF', 'NORMAL_TITLE','CRF_TITLE'], repeat_index_range = range(3)):
+def dd2_all_info(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMAL', 'CRF', 'NORMAL_TITLE','CRF_TITLE'], repeat_index_range = range(3), RP = 'RP'):
     directory = os.fsencode(directory_in_str)
     filepaths = [] # 获取文件路径
     filenames = [] # 文件名
@@ -90,7 +91,7 @@ def dd2_all_info(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names 
                 the_test = 0
                 the_path = ''
                 for name, path in zip(filenames, filepaths): # 遍历, 无所谓，只是15个文件名字符串处理而已
-                    pattern = f'{type_name}_RP{repeat_index}_DS{dataset_index}_.*'
+                    pattern = f'{type_name}_{RP}{repeat_index}_DS{dataset_index}_.*'
                     if len(re.findall(pattern, name)) > 0: # 不同step的处理，根据文件名读取数字
                         dev = float(re.findall('dev(0\.?\d*)', name)[0])
                         if dev > best_dev:

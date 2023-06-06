@@ -1,3 +1,4 @@
+# NOTE: 该文件作为实验+获取实验结果的脚本
 from taku_subword_expand import run as run1 # vanilla, crf
 from taku_title import run as run2 # title_vanilla, title_crf
 from compare_lstm import run_batch as run_batch_lstm
@@ -21,4 +22,6 @@ def bilstm():
     res = dd2_all_info(type_names=['BILSTM','BILSTM_TITLE'], repeat_index_range = range(3)) # (5, 2, 3, 3), 最后一个维度分解为(prec, rec, f)
 
 def bert_title_onehot():
+    res = dd2_all_info(type_names=['BERT_TITLE_ONEHOT'], repeat_index_range = range(3), RP = '') # (5, 2, 3, 3), 最后一个维度分解为(prec, rec, f)
     pass
+

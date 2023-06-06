@@ -18,17 +18,17 @@ def token_transfer_by_titles(tokens, titles, i, last, then):
 
 
 # NOTE: 如果是强调就增加<u>和</u>在两边
-def token_transfer_by_labels(tokens, ls, i, last, then):
+def token_transfer_by_labels(tokens, ls, i, last, then, left_mark = '<u>', right_mark = '</u>'):
     last_is_emphasize = ls[last] if last > -1 else False
     next_is_emphasize = ls[then] if then < len(tokens) else False
     current_is_emphasize = ls[i]
     if current_is_emphasize:
         if not last_is_emphasize: # 唯一需要特殊对待的情况
             # False True 的情况，增加左标记
-            tokens[i] = '<u>' + tokens[i]
+            tokens[i] = left_mark + tokens[i]
         if not next_is_emphasize:
             # True False 的情况，增加右标记
-            tokens[i] = tokens[i] + '</u>'
+            tokens[i] = tokens[i] + right_mark
 
 
 
@@ -63,6 +63,18 @@ def print_sentence(item, emphasizes = None):
         text = '□' + text
     return text
 
+def mark_sentence(item, need_title = True, need_ground_true = False):
+    tokens, ls, titles, paras = item
+    tokens = tokens.copy()
+    for i in range(len(tokens)):
+        last = i - 1
+        then = i + 1
+        if need_title:
+            token_transfer_by_titles(tokens, titles, i, last, then)
+        if need_ground_true:
+            token_transfer_by_labels(tokens, ls, i, last, then, left_mark = '【', right_mark = '】')
+    text = ''.join(tokens)
+    return text
 
 # NOTE: 将例子通过网页打印
 def ds_printer(ds, LENGTH = None):
