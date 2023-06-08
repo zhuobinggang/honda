@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 from dataset_info import read_ds_all
+from functools import lru_cache
 
 # 将数据集的每个case追溯到源文件
-# TODO: 解析sgml(中间级文件)
+# 解析sgml(中间级文件)
 PATH_TEXTS = './data_five/CRL_NE_DATA_1.sgml' 
 PATH_TITLES = './data_five/CRL_NE_DATA_1_TITLE.sgml' 
 
@@ -66,8 +67,8 @@ def reversible_flatten_list(two_dim_list):
             list_with_meta_info.append((dim1, (dim0_idx, dim1_idx)))
     return list_with_meta_info
 
-# TODO: 将article保存为json类似的文件？
-def delete_until_equal(items, arts):
+# 将article保存为json类似的文件？ -> 不需要了，直接跑一遍比较好，不需要保存中间结果
+def delete_until_equal(items, arts, log = True):
     while sentences_length(arts) > len(items):
         # NOTE: 怎么删到article里边？
         # NOTE: sentence idx要对应到(article idx, relative sentence idx)
@@ -76,9 +77,10 @@ def delete_until_equal(items, arts):
         for idx, (item, sent_with_meta) in enumerate(zip(items, sents_with_meta)):
             sent, (article_idx, relative_sent_idx) = sent_with_meta
             if len(item) != len(sent) or item != sent: # 即便长度相等也要认真比较一下
-                print(f'WARNING {idx}: DIFFERENT SENTENCE!')
-                print(f'{item}')
-                print(f'{sent}\n')
+                if log:
+                    print(f'WARNING {idx}: DIFFERENT SENTENCE!')
+                    print(f'{item}')
+                    print(f'{sent}\n')
                 break
         del arts[article_idx][relative_sent_idx]
     return arts
@@ -95,6 +97,28 @@ def check_deleted_raw_datas():
     check_different_idx(items, arts_deleted) # 出错，看看是哪里有问题 -> 是判断两个句子相等的算法问题 -> 增加了小小的例外符号排除算法
 
 
+###################### 解析title sgml ################
 
+@lru_cache(maxsize=None)
+def get_sents_with_meta():
+    print('Calculating ...')
+    items, arts = get_processed_data_vs_raw_data(need_flatten = False)
+    arts_deleted = delete_until_equal(items, arts, log = False)
+    sents_with_meta = reversible_flatten_list(arts_deleted)
+    print('Calculated')
+    return sents_with_meta
+
+@lru_cache(maxsize=None)
+def titles_raw():
+    suffix = ':ライフハッカー［日本版］'
+    soup = BeautifulSoup(sgml_text(PATH_TITLES))
+    titles = [title.text.strip().replace(suffix, '') for title in soup.find_all('text')]
+    return titles
+
+def case_id_to_title(idx):
+    sents_with_meta = get_sents_with_meta()
+    titles = titles_raw()
+    sent, (article_idx, relative_sent_idx) = sents_with_meta[idx]
+    return titles[article_idx]
 
 
