@@ -5,7 +5,7 @@ def read_ds_all():
     ld = Loader()
     ds_train = ld.read_trains(1)[0]
     ds_test = ld.read_tests(1)[0]
-    ds_all = ds_train + ds_test
+    ds_all = ds_test + ds_train
     return ds_all
 
 def cal_emphasize_rate():
