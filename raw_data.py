@@ -17,11 +17,11 @@ def sgml_text(path):
     return text
 
 def article_raw():
-    soup = BeautifulSoup(sgml_text(PATH_TEXTS))
+    soup = BeautifulSoup(sgml_text(PATH_TEXTS), 'lxml')
     return soup.find_all('text')
 
 def article_analyse(path = PATH_TEXTS):
-    soup = BeautifulSoup(sgml_text(path))
+    soup = BeautifulSoup(sgml_text(path), 'lxml')
     arts = [article.text.strip().split('\n') for article in soup.find_all('text')]
     # NOTE: strong mark is not analysed
     return arts
@@ -111,10 +111,11 @@ def get_sents_with_meta():
 @lru_cache(maxsize=None)
 def titles_raw():
     suffix = ':ライフハッカー［日本版］'
-    soup = BeautifulSoup(sgml_text(PATH_TITLES))
+    soup = BeautifulSoup(sgml_text(PATH_TITLES), 'lxml')
     titles = [title.text.strip().replace(suffix, '') for title in soup.find_all('text')]
     return titles
 
+@lru_cache(maxsize=None)
 def case_id_to_title(idx):
     sents_with_meta = get_sents_with_meta()
     titles = titles_raw()

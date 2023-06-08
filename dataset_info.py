@@ -1,6 +1,8 @@
 # NOTE: 该文件作为获取数据集情报的据点
 from taku_reader2 import Loader
+from functools import lru_cache
 
+@lru_cache(maxsize=None)
 def read_ds_all():
     ld = Loader()
     ds_train = ld.read_trains(1)[0]
@@ -8,6 +10,7 @@ def read_ds_all():
     ds_all = ds_test + ds_train
     return ds_all
 
+@lru_cache(maxsize=None)
 def cal_emphasize_rate():
     ds_all = read_ds_all()
     LENGTH_ALL = 0

@@ -1,0 +1,59 @@
+# NOTE: 将5分割还原到下标获取
+from dataset_info import read_ds_all
+from taku_reader2 import Loader
+from raw_data import case_id_to_title
+from functools import lru_cache
+
+def get_testset_ranges(test_lengths):
+    starts = [0]
+    ends = []
+    for idx, length in enumerate(test_lengths):
+        starts.append(starts[idx] + length)
+        ends.append(starts[idx] + length)
+    return zip(starts, ends)
+
+@lru_cache(maxsize=None)
+def ds_5div_reconstructed():
+    # 手动找到每个test.txt的开始和最后一篇文章的下标就可以了
+    ds_all = read_ds_all()
+    test_lengths = [1587, 1730, 1257, 1181, 1384]
+    test_ranges = get_testset_ranges(test_lengths)
+    # test_ranges = [(0, 67), (67, 133), (133, 199), (199, 265), (265, 331)]
+    tests_reconstructed = [ds_all[start:end] for start,end in test_ranges]
+    trains_reconstructed = [ds_all[0:start] + ds_all[end:] for start,end in test_ranges]
+    return trains_reconstructed, tests_reconstructed
+
+def read_dataset(idx):
+    trains_reconstructed, tests_reconstructed = ds_5div_reconstructed()
+    return trains_reconstructed[idx], tests_reconstructed[idx]
+
+def valid():
+    trains_reconstructed, tests_reconstructed = ds_5div_reconstructed()
+    tests = Loader().read_tests(5)
+    for t1, t2 in zip(tests, tests_reconstructed):
+        assert t1 == t2
+    trains = Loader().read_trains(5)
+    for t1, t2 in zip(trains, trains_reconstructed):
+        assert t1 == t2
+
+
+############################ 包含Title信息的loader #######################
+
+def read_ds_all_with_title():
+    res = []
+    for idx, item in enumerate(read_ds_all()):
+        title = case_id_to_title(idx)
+        res.append(item + (title, )) # tuple concat
+    return res
+
+@lru_cache(maxsize=None)
+def ds_5div_reconstructed_with_title():
+    # 手动找到每个test.txt的开始和最后一篇文章的下标就可以了
+    ds_all = read_ds_all_with_title()
+    test_lengths = [1587, 1730, 1257, 1181, 1384]
+    test_ranges = get_testset_ranges(test_lengths)
+    # test_ranges = [(0, 67), (67, 133), (133, 199), (199, 265), (265, 331)]
+    tests_reconstructed = [ds_all[start:end] for start,end in test_ranges]
+    trains_reconstructed = [ds_all[0:start] + ds_all[end:] for start,end in test_ranges]
+    return trains_reconstructed, tests_reconstructed
+
