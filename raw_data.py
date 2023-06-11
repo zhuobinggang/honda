@@ -121,5 +121,3 @@ def case_id_to_title(idx):
     titles = titles_raw()
     sent, (article_idx, relative_sent_idx) = sents_with_meta[idx]
     return titles[article_idx]
-
-

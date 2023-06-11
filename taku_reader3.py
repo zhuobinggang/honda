@@ -1,8 +1,9 @@
 # NOTE: 将5分割还原到下标获取
 from dataset_info import read_ds_all
 from taku_reader2 import Loader
-from raw_data import case_id_to_title
+from raw_data import case_id_to_title, get_sents_with_meta
 from functools import lru_cache
+import re
 
 def get_testset_ranges(test_lengths):
     starts = [0]
@@ -56,4 +57,14 @@ def ds_5div_reconstructed_with_title():
     tests_reconstructed = [ds_all[start:end] for start,end in test_ranges]
     trains_reconstructed = [ds_all[0:start] + ds_all[end:] for start,end in test_ranges]
     return trains_reconstructed, tests_reconstructed
+
+
+# NOTE: 通过文本检索原来的case
+def text_to_flatten_index(text):
+    res = []
+    sents_with_meta = get_sents_with_meta()
+    for idx, (sent, meta) in enumerate(sents_with_meta):
+        if re.search(text, sent) is not None:
+            res.append((sent, meta, idx))
+    return res
 

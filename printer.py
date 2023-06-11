@@ -86,6 +86,14 @@ def ds_printer(ds, LENGTH = None):
         texts.append(text)
     return texts
 
+def case_check(item):
+    tokens = item[0]
+    titles = item[2]
+    for token, is_title in zip(tokens, titles):
+        print(f'{token} {is_title}')
+
+
+
 
 ######################## Script
 

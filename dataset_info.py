@@ -1,6 +1,7 @@
 # NOTE: 该文件作为获取数据集情报的据点
 from taku_reader2 import Loader
 from functools import lru_cache
+from fugashi import Tagger
 
 @lru_cache(maxsize=None)
 def read_ds_all():
