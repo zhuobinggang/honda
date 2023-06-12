@@ -61,7 +61,7 @@ def cal(output_text, items, mark = '**'):
                 else: # 强调逻辑
                     start += 2 # 算上**的长度
                     if len(emphasize_buff) == 0: # 开区间
-                        print(f'EMPHASIZE START: {token}')
+                        # print(f'EMPHASIZE START: {token}')
                         emphasize_buff.append(token)
                         outputs.append(1)
                     else: 
@@ -81,6 +81,9 @@ def cal(output_text, items, mark = '**'):
                 outputs.append(1)
             else:
                 outputs.append(0)
+    if start < len(output_text):
+        emphasized_text = ''.join(emphasize_buff)
+        print(f'EMPHASIZE END: {emphasized_text}')
     labels = flatten([item[1] for item in items])
     return outputs, labels
         
@@ -142,12 +145,11 @@ def script(ds_idx = 1, case_idx = 3, output_text = None):
     datas, starts = generate_prompt_from_dataset(ds_idx)
     prompt = title_text_to_prompt(*datas[case_idx])
     if output_text is None:
-        print(prompt)
-        return None
+        return prompt
     else:
         output_text = response_format(output_text)
         outputs, labels = test_as_hand_copy(ds_idx, case_idx, starts, output_text)
-        print(f'{ds_idx}\t{case_idx}\t{output_text}')
+        print(f'{ds_idx},{case_idx},{output_text}')
         return outputs, labels
 
 
