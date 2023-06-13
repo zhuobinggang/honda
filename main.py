@@ -129,11 +129,9 @@ class Sector_2022(nn.Module):
         )
 
     def get_labels_from_input(self, item):
-        tokens, labels = item
-        return labels
+        return item[1]
     def get_tokens_from_input(self, item):
-        tokens, labels = item
-        return tokens
+        return item[0]
 
     def forward(self, item):
         tokens = self.get_tokens_from_input(item)

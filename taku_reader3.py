@@ -11,7 +11,7 @@ def get_testset_ranges(test_lengths):
     for idx, length in enumerate(test_lengths):
         starts.append(starts[idx] + length)
         ends.append(starts[idx] + length)
-    return zip(starts, ends)
+    return list(zip(starts, ends))
 
 @lru_cache(maxsize=None)
 def ds_5div_reconstructed():
