@@ -48,7 +48,10 @@ def token_transfer_by_emphasizes(tokens, emphasizes, i, last, then):
 
 
 def print_sentence(item, emphasizes = None):
-    tokens, ls, titles, paras = item
+    tokens = item[0]
+    ls = item[1]
+    titles = item[2]
+    paras = item[3]
     tokens = tokens.copy()
     for i in range(len(tokens)):
         last = i - 1

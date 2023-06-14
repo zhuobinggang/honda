@@ -107,6 +107,19 @@ def title_text_to_prompt(title, text):
 def raw_data_to_prompts(raw_datas):
     return [title_text_to_prompt(title, text) for title, text in raw_datas]
 
+def generate_prompt_from_arts(arts):
+    res = []
+    for art in arts:
+        text = ''
+        title = art[0][-1]
+        for item in art:
+            tokens = item[0]
+            text += ''.join(tokens)
+        prompt = title_text_to_prompt(title, text)
+        res.append(prompt)
+    return res
+
+
 @lru_cache(maxsize=None)
 def generate_prompt_from_dataset(dataset_index):
     _, tests = ds_5div_reconstructed_with_title()
