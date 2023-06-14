@@ -10,7 +10,7 @@ class Sector_Title_Append(Sector):
     def get_title(self, item):
         return item[-1]
     def forward(self, item):
-        ids = encode_title_append(self.toker, self.get_tokens(item), self.get_title(item))
+        ids, heads = encode_title_append(self.toker, self.get_tokens(item), self.get_title(item))
         # TODO: 给title编码，然后追加在后边
         # (1, seq_len + 2, 768)
         out_bert = self.bert(ids.unsqueeze(0).cuda()).last_hidden_state
@@ -25,7 +25,7 @@ def encode_title_append(toker, tokens, title):
      ids_title = torch.LongTensor(ids_title)
      ids, heads = encode_plus(tokens, toker)
      ids_concat = torch.cat((ids, ids_title))
-     return ids_concat
+     return ids_concat, heads
 
 def run(seed = 10, indexs = range(3)):
     torch.manual_seed(seed)

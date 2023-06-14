@@ -129,7 +129,7 @@ def script2():
     # BILSTM based
     res = dd2_all_info(type_names=['BILSTM','BILSTM_TITLE'], repeat_index_range = range(3)) # (5, 2, 3, 3), 最后一个维度分解为(prec, rec, f)
     # Title as append
-    res = dd2_all_info(type_names=['SECTOR_TITLE_APPEND'], repeat_index_range = range(3)) # (5, 2, 3, 3), 最后一个维度分解为(prec, rec, f)
+    res = dd2_all_info(type_names=['SECTOR_TITLE_APPEND'], repeat_index_range = range(9)) # (5, 2, 3, 3), 最后一个维度分解为(prec, rec, f)
 
 
 
