@@ -154,7 +154,8 @@ def test_as_hand_copy(ds_idx, case_idx, start_idxs, output_text):
     return outputs, labels
 
     
-def script(ds_idx = 1, case_idx = 3, output_text = None):
+# NOTE: 
+def run(ds_idx = 1, case_idx = 3, output_text = None):
     datas, starts = generate_prompt_from_dataset(ds_idx)
     prompt = title_text_to_prompt(*datas[case_idx])
     if output_text is None:
@@ -178,10 +179,16 @@ def cal_from_csv(path = './achive/chatgpt_output.csv'):
     # 计算
     outputs = []
     labels = []
-    for ds_idx, case_idx, text in datas:
-        o, l = script(int(ds_idx), int(case_idx), text)
-        outputs += o
-        labels += l
+    for item in datas:
+        if len(item) < 1:
+            continue
+        else:
+            ds_idx = item[0]
+            case_idx = item[1]
+            text = ','.join(item[2:])
+            o, l = run(int(ds_idx), int(case_idx), text)
+            outputs += o
+            labels += l
     print(cal_prec_rec_f1_v2(outputs, labels))
     return outputs, labels
 
