@@ -168,6 +168,9 @@ def run(ds_idx = 1, case_idx = 3, output_text = None):
 
 
 ###### 读取chatgpt_output.csv用以计算结果
+# 安部: '/home/taku/research/honda/achive/hitote/output.csv' 
+# chatgpt: '/home/taku/research/honda/achive/chatgpt/chatgpt_output.csv' 
+# gpt4: '/home/taku/research/honda/achive/gpt4/gpt4output.csv' 
 def cal_from_csv(path = './achive/chatgpt_output.csv'):
     datas = []
     with open(path, newline='') as csvfile:

@@ -1,5 +1,5 @@
 from taku_reader3 import read_ds_all_with_title
-from chatgpt import *
+from chatgpt import cal_from_csv
 from title_as_append import Sector_Title_Append
 import torch
 from printer import *
@@ -41,9 +41,14 @@ def run_model():
     score = model.test(flatten(arts))
     return score
 
-def run_chatgpt():
-    arts = get_first_ten_article()
-    prompts = generate_prompt_from_arts(arts)
-    return prompts
+def run_others():
+    path = {
+        '安部': '/home/taku/research/honda/achive/hitote/output.csv', 
+        'chatgpt': '/home/taku/research/honda/achive/chatgpt/chatgpt_output.csv', 
+        'gpt4': '/home/taku/research/honda/achive/gpt4/gpt4output.csv'
+    }
+    cal_from_csv(path = path['安部'])
+    cal_from_csv(path = path['chatgpt'])
+    cal_from_csv(path = path['gpt4'])
 
 
