@@ -155,6 +155,7 @@ def test_as_hand_copy(ds_idx, case_idx, start_idxs, output_text):
 
     
 # NOTE: 
+# random 3 for sample: 19, 43, 50
 def run(ds_idx = 1, case_idx = 3, output_text = None):
     datas, starts = generate_prompt_from_dataset(ds_idx)
     prompt = title_text_to_prompt(*datas[case_idx])
