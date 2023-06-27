@@ -152,13 +152,13 @@ class Sector_2022(nn.Module):
         return loss
 
     # 和printer.py配合
-    def emphasize(self, item):
+    def emphasize(self, item, threshold = 0.5):
         out_mlp = self.forward(item)  # (seq_len)
         out_mlp = out_mlp.tolist()
-        res = [True if res > 0.5 else False for res in out_mlp]
+        res = [True if res > threshold else False for res in out_mlp]
         return res
 
-    def test(self, ds):
+    def test(self, ds, threshold = 0.5, return_logits = False):
         target_all = []
         result_all = []
         for item in ds:
@@ -167,10 +167,14 @@ class Sector_2022(nn.Module):
             out_mlp = out_mlp.tolist()
             result_all.append(out_mlp)
         # flatten & calculate
-        results = flatten(result_all)
-        results = [1 if res > 0.5 else 0 for res in results]
+        logits = flatten(result_all)
+        results = [1 if res > threshold else 0 for res in logits]
         targets = flatten(target_all)
-        return cal_prec_rec_f1_v2(results, targets)
+        score = cal_prec_rec_f1_v2(results, targets)
+        if return_logits:
+            return score, logits
+        else:
+            return score
 
     def opter_step(self):
         self.opter.step()

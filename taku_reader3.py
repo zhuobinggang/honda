@@ -1,5 +1,5 @@
 # NOTE: 将5分割还原到下标获取
-from dataset_info import read_ds_all
+from dataset_info import read_ds_all, cal_emphasize_rate
 from taku_reader2 import Loader
 from raw_data import case_id_to_title, get_sents_with_meta
 from functools import lru_cache
@@ -67,4 +67,19 @@ def text_to_flatten_index(text):
         if re.search(text, sent) is not None:
             res.append((sent, meta, idx))
     return res
+
+############################# dataset info #########################
+def cal_emphasize_rate_5div():
+    trs, tes = ds_5div_reconstructed_with_title()
+    res = []
+    for ds in trs:
+        dd = cal_emphasize_rate(ds)
+        res.append(dd)
+    return res
+
+def get_flatten_labels(ds):
+    ls = []
+    for item in ds:
+        ls += item[1]
+    return ls
 
