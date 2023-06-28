@@ -9,8 +9,11 @@ class Sector_Title_Append(Sector):
         return item[0]
     def get_title(self, item):
         return item[-1]
-    def forward(self, item):
+    def get_ids_and_heads(self, item):
         ids, heads = encode_title_append(self.toker, self.get_tokens(item), self.get_title(item))
+        return ids, heads
+    def forward(self, item):
+        ids, heads = self.get_ids_and_heads(item)
         # TODO: 给title编码，然后追加在后边
         # (1, seq_len + 2, 768)
         out_bert = self.bert(ids.unsqueeze(0).cuda()).last_hidden_state
