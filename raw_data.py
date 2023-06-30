@@ -20,6 +20,7 @@ def article_raw():
     soup = BeautifulSoup(sgml_text(PATH_TEXTS), 'lxml')
     return soup.find_all('text')
 
+@lru_cache(maxsize=None)
 def article_analyse(path = PATH_TEXTS):
     soup = BeautifulSoup(sgml_text(path), 'lxml')
     arts = [article.text.strip().split('\n') for article in soup.find_all('text')]
