@@ -25,7 +25,7 @@ class Sector_Title_Append(Sector):
 
 def encode_title_append(toker, tokens, title):
      ids_title = toker.encode(title ,add_special_tokens = False)
-     ids_title.append(3) # 增加[SEP]
+     ids_title.append(toker.sep_token_id) # 增加[SEP]
      ids_title = torch.LongTensor(ids_title)
      ids, heads = encode_plus(tokens, toker)
      ids_concat = torch.cat((ids, ids_title))

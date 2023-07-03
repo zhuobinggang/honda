@@ -47,7 +47,7 @@ def encode_plus(tokens, toker):
         ids = toker.encode(token, add_special_tokens = False)
         ids_expand += ids
     # Special Token
-    ids_expand = [2] + ids_expand + [3]
+    ids_expand = [toker.cls_token_id] + ids_expand + [toker.sep_token_id]
     head_indexs = [idx + 1 for idx in head_indexs]
     return torch.LongTensor(ids_expand), head_indexs
 
