@@ -4,6 +4,7 @@ from title_as_append import Sector_Title_Append
 from taku_reader3 import ds_5div_reconstructed_with_title
 import numpy as np
 import torch
+from exp_model_for_news_emphasize import print_sentence
 
 
 def for_title_append():
@@ -26,3 +27,17 @@ def for_title_append():
             (prec, rec, f, _) = model.test(the_ds_test)
             res[dataset_idx, repeat_idx] = [prec, rec, f]
     return res
+
+def case_study():
+    path = '/usr01/taku/checkpoint/honda/SECTOR_TITLE_APPEND_RP0_DS0_step2400_dev0.409_test0.409.checkpoint'
+    checkpoint = torch.load(path)
+    model = Sector_Title_Append()
+    model.load_state_dict(checkpoint['model_state_dict'])
+    _, org_ds_test = ds_5div_reconstructed_with_title()
+
+
+
+
+
+
+

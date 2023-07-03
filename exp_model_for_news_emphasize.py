@@ -1,6 +1,7 @@
 # 用title_as_append模型来强调新闻
 from title_as_append import Sector_Title_Append
 import torch
+from functools import lru_cache
 
 def read_raw_lines(path = '/home/taku/research/honda/data_five/news_exp.ds'):
     f = open(path)
@@ -80,6 +81,7 @@ def token_transfer_by_emphasizes(tokens, emphasizes, i, last, then):
             tokens[i] = tokens[i] + '】'
 
 def print_sentence(tokens, emphasizes):
+    tokens = tokens.copy()
     for i in range(len(tokens)):
         last = i - 1
         then = i + 1
@@ -87,13 +89,39 @@ def print_sentence(tokens, emphasizes):
     text = ''.join(tokens)
     return text
 
-def run():
+@lru_cache(maxsize=None)
+def get_model_for_test():
     from scorer import best_checkpoints
     _, paths = best_checkpoints(type_names = ['SECTOR_TITLE_APPEND'], return_paths = True)
     path = paths[0][0]
     checkpoint = torch.load(path)
     model = Model()
     model.load_state_dict(checkpoint['model_state_dict'])
+    return model
+
+def ds_without_title(ds):
+    ds = ds.copy()
+    for item in ds:
+        item['title'] = ''
+    return ds
+
+def emphasize(model = None, ds = None):
+    if model is None:
+        model = get_model_for_test()
+    if ds is None:
+        ds = second_process_ds()
+    texts = []
+    for item in ds:
+        emphasizes = model.emphasize(item)
+        ids, heads = model.get_ids_and_heads(item)
+        ids = ids[heads]
+        tokens = [model.toker.decode(idx) for idx in ids] 
+        texts.append(print_sentence(tokens, emphasizes))
+    text = ''.join(texts).replace(' ', '').replace('##', '')
+    return text
+
+def run():
+    model = get_model_for_test()
     ds = second_process_ds()
     print(len(ds))
     texts = []
