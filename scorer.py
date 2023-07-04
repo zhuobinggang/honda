@@ -63,7 +63,8 @@ def dd2(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMA
                 the_path = ''
                 for name, path in zip(filenames, filepaths): # 遍历, 无所谓，只是15个文件名字符串处理而已
                     pattern = f'{type_name}_RP{repeat_index}_DS{dataset_index}_.*'
-                    if len(re.findall(pattern, name)) > 0: # 不同step的处理，根据文件名读取数字
+                    # if len(re.findall(pattern, name)) > 0:
+                    if re.match(pattern, name): # 不同step的处理，根据文件名读取数字
                         dev = float(re.findall('dev(0\.?\d*)', name)[0])
                         if dev > best_dev:
                             the_name = name
