@@ -8,14 +8,11 @@ import numpy as np
 # Plan A: 让BERT处理
 class Sector_Title(Sector):
     def get_labels_from_input(self, item):
-        tokens, labels, titles, paras = item
-        return labels
+        return item[1]
     def get_tokens_from_input(self, item):
-        tokens, labels, titles, paras = item
-        return tokens
+        return item[0]
     def get_titles_from_input(self, item):
-        tokens, labels, titles, paras = item
-        return titles
+        return item[2]
     def forward(self, item):
         tokens = self.get_tokens_from_input(item)
         ids, heads = encode_plus_title(self.toker, tokens, self.get_titles_from_input(item))
@@ -29,14 +26,14 @@ class Sector_Title(Sector):
 
 class Sector_CRF_Title(Sector_CRF):
     def get_labels_from_input(self, item):
-        tokens, labels, titles = item
-        return labels
+        return item[1]
     def get_tokens_from_input(self, item):
-        tokens, labels, titles = item
-        return tokens
+        return item[0]
+    def get_titles_from_input(self, item):
+        return item[2]
     def forward(self, item):
-        tokens, _, titles = item
-        ids, heads = encode_plus_title(self.toker, tokens, titles)
+        tokens = self.get_tokens_from_input(item)
+        ids, heads = encode_plus_title(self.toker, tokens, self.get_titles_from_input(item))
         assert len(heads) == len(tokens)
         # (1, seq_len + 2, 768)
         out_bert = self.bert(ids.unsqueeze(0).cuda()).last_hidden_state

@@ -1,12 +1,18 @@
-import torch
 import numpy as np
-import matplotlib.pyplot as plt
 
+def save_dic(dic, path = 'dd.dic'):
+    import pickle
+    pickle.dump(dic, open(path,"wb"))
+
+def load_dic(path = 'dd.dic'):
+    import pickle
+    return pickle.load(open(path,"rb"))
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
 def draw_line_chart(x, ys, legends, path = 'dd.png', colors = None, xlabel = None, ylabel = None):
+    import matplotlib.pyplot as plt
     plt.clf()
     for i, (y, l) in enumerate(zip(ys, legends)):
         if colors is not None:
@@ -23,6 +29,7 @@ def draw_line_chart(x, ys, legends, path = 'dd.png', colors = None, xlabel = Non
 
 # NOTE: 不再使用，作为原型参考
 def save_checkpoint_proto(PATH, model, step, score):
+    import torch
     torch.save({
             'model_state_dict': model.m.state_dict(),
             'score': score,
@@ -30,6 +37,7 @@ def save_checkpoint_proto(PATH, model, step, score):
             }, PATH)
 
 def load_checkpoint(PATH):
+    import torch
     raise ValueError('手动load,不要用这个函数')
     model = Sector()
     checkpoint = torch.load(PATH)
@@ -38,17 +46,18 @@ def load_checkpoint(PATH):
     step = checkpoint['step']
     return model
 
-@torch.no_grad()
 def get_test_result(model, ld):
-    # Test
-    preds = []
-    trues = []
-    for idx, (ss, ls) in enumerate(ld):
-        out, tar = model.forward(ss, ls)
-        preds.append(out.argmax().item())
-        trues.append(ls[2])
-    result = cal_prec_rec_f1_v2(preds, trues)
-    return result
+    import torch
+    with torch.no_grad():
+        # Test
+        preds = []
+        trues = []
+        for idx, (ss, ls) in enumerate(ld):
+            out, tar = model.forward(ss, ls)
+            preds.append(out.argmax().item())
+            trues.append(ls[2])
+        result = cal_prec_rec_f1_v2(preds, trues)
+        return result
 
 def cal_prec_rec_f1_v2(results, targets):
     TP = 0
@@ -166,6 +175,7 @@ def check_gradient(model):
 
 ############# NOTE: 训练过程，因任务的不同而变，专属于NER
 def save_checkpoint(name, model, step, score_dev, score_test):
+    import torch
     PATH = f'/usr01/taku/checkpoint/honda/{name}_step{step + 1}_dev{round(score_dev[2], 3)}_test{round(score_test[2], 3)}.checkpoint'
     score = {'dev': score_dev, 'test': score_test}
     torch.save({
