@@ -186,6 +186,8 @@ def t_test(dic = None):
     stats.wilcoxon(dic['BERT'], dic['BERT_TITLE'])
     stats.wilcoxon(dic['BERT'], dic['BERT_TITLE2'])
     stats.wilcoxon(dic['BERT_TITLE'], dic['BERT_TITLE2'])
+    # CRF
+    dic3 = load_dic('exp/t_test_crf_only.dic')
     
 
 
