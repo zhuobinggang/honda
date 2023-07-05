@@ -1,5 +1,6 @@
 import fasttext
 import torch
+from torchcrf import CRF
 import numpy as np
 from torch import nn
 from torch import optim
@@ -156,7 +157,7 @@ class BILSTM_TITLE_CRF(BILSTM_TITLE):
         labels = self.get_labels_from_input(item)
         out_mlp = self.forward(item)  # (seq_len, 2)
         out_mlp = out_mlp.unsqueeze(0) # (1, seq_len, 2)
-        tags = t.LongTensor([self.get_labels_from_input(item)]).cuda()
+        tags = torch.LongTensor([self.get_labels_from_input(item)]).cuda()
         loss = -self.crf(out_mlp, tags)
         return loss
     def emphasize(self, item):
