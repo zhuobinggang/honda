@@ -66,49 +66,6 @@ class BILSTM(nn.Module):
         self.opter.zero_grad()
 
 
-# 使用fugashi分词，然后使用fasttext获取emb，然后LSTM结合特征，最后MLP输出结果
-# 手稿
-def run(seed = 10, indexs = range(3), mtype = 0):
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    ld = Loader()
-    mess_train_dev = ld.read_trains(1)[0]
-    ds_train = mess_train_dev[:-500]
-    ds_dev = mess_train_dev[-500:]
-    ds_test = ld.read_tests(1)[0]
-    if mtype == 0:
-        m = BILSTM()
-        # 5 * 10 * 2 * 400 * 3 = 120GB
-        train_and_save_checkpoints(m, f'bilstm', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
-    elif mtype == 1:
-        print('bilstm title')
-        m = BILSTM_TITLE()
-        # 5 * 10 * 2 * 400 * 3 = 120GB
-        train_and_save_checkpoints(m, f'BILSTM_TITLE', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
-
-def run_batch(seed = 10, indexs = range(3), mtype = 0):
-    torch.manual_seed(seed)
-    np.random.seed(seed)
-    ld = Loader()
-    for repeat in indexs:
-        for idx, (mess_train_dev, ds_test) in enumerate(zip(ld.read_trains(5), ld.read_tests(5))):
-            ds_train = mess_train_dev[:-500]
-            ds_dev = mess_train_dev[-500:]
-            if mtype == 0:
-                m = BILSTM()
-                train_and_save_checkpoints(m, f'BILSTM_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
-            elif mtype == 1:
-                print('BILSTM_TITLE')
-                m = BILSTM_TITLE()
-                train_and_save_checkpoints(m, f'BILSTM_TITLE_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
-            elif mtype == 2:
-                print('BILSTM_TITLE_CRF')
-                m = BILSTM_TITLE_CRF()
-                train_and_save_checkpoints(m, f'BILSTM_TITLE_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
-
-def script():
-    run_batch(mtype = 0) # BILSTM
-    run_batch(mtype = 1) # BILSTM + TITLE
 
 
 ################## LSTM加标题情报
@@ -180,4 +137,51 @@ class BILSTM_TITLE_CRF(BILSTM_TITLE):
         targets = flatten(target_all)
         return cal_prec_rec_f1_v2(results, targets)
 
+
+
+######################## scripts ############################
+# 使用fugashi分词，然后使用fasttext获取emb，然后LSTM结合特征，最后MLP输出结果
+# 手稿
+def run(seed = 10, indexs = range(3), mtype = 0):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    ld = Loader()
+    mess_train_dev = ld.read_trains(1)[0]
+    ds_train = mess_train_dev[:-500]
+    ds_dev = mess_train_dev[-500:]
+    ds_test = ld.read_tests(1)[0]
+    if mtype == 0:
+        m = BILSTM()
+        # 5 * 10 * 2 * 400 * 3 = 120GB
+        train_and_save_checkpoints(m, f'bilstm', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+    elif mtype == 1:
+        print('bilstm title')
+        m = BILSTM_TITLE()
+        # 5 * 10 * 2 * 400 * 3 = 120GB
+        train_and_save_checkpoints(m, f'BILSTM_TITLE', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+
+def run_batch(seed = 10, indexs = range(3), mtype = 0):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    ld = Loader()
+    for repeat in indexs:
+        for idx, (mess_train_dev, ds_test) in enumerate(zip(ld.read_trains(5), ld.read_tests(5))):
+            ds_train = mess_train_dev[:-500]
+            ds_dev = mess_train_dev[-500:]
+            if mtype == 0:
+                m = BILSTM()
+                train_and_save_checkpoints(m, f'BILSTM_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+            elif mtype == 1:
+                print('BILSTM_TITLE')
+                m = BILSTM_TITLE()
+                train_and_save_checkpoints(m, f'BILSTM_TITLE_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+            elif mtype == 2:
+                print('BILSTM_TITLE_CRF')
+                m = BILSTM_TITLE_CRF()
+                train_and_save_checkpoints(m, f'BILSTM_TITLE_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+
+def script():
+    run_batch(mtype = 0) # BILSTM
+    run_batch(mtype = 1) # BILSTM + TITLE
+    run_batch(mtype = 2) # BILSTM + TITLE + CRF
 

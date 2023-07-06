@@ -101,7 +101,7 @@ def f_score_by_articles_BERT_TITLE2(dic = None):
         dic['BERT_TITLE2'] += temp_fs.mean(0).tolist()
     return dic
 
-### CRF ###
+######################### CRF ##############################
 
 def f_score_by_articles_BERT_CRF(dic = None):
     from taku_subword_expand import Sector, Sector_CRF
@@ -172,6 +172,77 @@ def f_score_by_articles_BERT_TITLE2_CRF(dic = None):
         dic['BERT_TITLE2_CRF'] += temp_fs.mean(0).tolist()
     return dic
 
+
+######################### BiLSTM ##############################
+def f_score_by_articles_BILSTM(dic = None):
+    from compare_lstm import BILSTM
+    if dic is None:
+        dic = {'BILSTM': [], 'BILSTM_TITLE': [], 'BILSTM_TITLE_CRF': []}
+    test_datasets_by_art = dataset_5div_article()
+    # BERT
+    checkpoints = get_checkpoint_paths('BILSTM')
+    for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
+        temp_fs = [] # 3 * 67
+        for path_repeat in paths_dataset:
+            temp_temp_fs = []
+            model = BILSTM()
+            checkpoint = torch.load(path_repeat)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            for art_idx, article in enumerate(articles):
+                prec, rec, f, _ = model.test(article)
+                print(f'{dataset_idx} {art_idx} : {f}')
+                temp_temp_fs.append(f)
+            temp_fs.append(temp_temp_fs)
+        temp_fs = np.array(temp_fs)
+        dic['BILSTM'] += temp_fs.mean(0).tolist()
+    return dic
+
+def f_score_by_articles_BILSTM_TITLE(dic = None):
+    from compare_lstm import BILSTM_TITLE
+    if dic is None:
+        dic = {'BILSTM': [], 'BILSTM_TITLE': [], 'BILSTM_TITLE_CRF': []}
+    test_datasets_by_art = dataset_5div_article()
+    # BERT
+    checkpoints = get_checkpoint_paths('BILSTM_TITLE')
+    for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
+        temp_fs = [] # 3 * 67
+        for path_repeat in paths_dataset:
+            temp_temp_fs = []
+            model = BILSTM_TITLE()
+            checkpoint = torch.load(path_repeat)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            for art_idx, article in enumerate(articles):
+                prec, rec, f, _ = model.test(article)
+                print(f'{dataset_idx} {art_idx} : {f}')
+                temp_temp_fs.append(f)
+            temp_fs.append(temp_temp_fs)
+        temp_fs = np.array(temp_fs)
+        dic['BILSTM_TITLE'] += temp_fs.mean(0).tolist()
+    return dic
+
+def f_score_by_articles_BILSTM_TITLE_CRF(dic = None):
+    from compare_lstm import BILSTM_TITLE_CRF
+    if dic is None:
+        dic = {'BILSTM': [], 'BILSTM_TITLE': [], 'BILSTM_TITLE_CRF': []}
+    test_datasets_by_art = dataset_5div_article()
+    # BERT
+    checkpoints = get_checkpoint_paths('BILSTM_TITLE_CRF')
+    for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
+        temp_fs = [] # 3 * 67
+        for path_repeat in paths_dataset:
+            temp_temp_fs = []
+            model = BILSTM_TITLE_CRF()
+            checkpoint = torch.load(path_repeat)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            for art_idx, article in enumerate(articles):
+                prec, rec, f, _ = model.test(article)
+                print(f'{dataset_idx} {art_idx} : {f}')
+                temp_temp_fs.append(f)
+            temp_fs.append(temp_temp_fs)
+        temp_fs = np.array(temp_fs)
+        dic['BILSTM_TITLE_CRF'] += temp_fs.mean(0).tolist()
+    return dic
+
 ###################### 检定 ####################
 
 def t_test(dic = None):
@@ -186,8 +257,14 @@ def t_test(dic = None):
     stats.wilcoxon(dic['BERT'], dic['BERT_TITLE'])
     stats.wilcoxon(dic['BERT'], dic['BERT_TITLE2'])
     stats.wilcoxon(dic['BERT_TITLE'], dic['BERT_TITLE2'])
+    # BERT
+    dic1 = load_dic('exp/t_test.dic')
+    # BERT_CRF
+    dic2 = load_dic('exp/t_test_crf.dic')
     # CRF
     dic3 = load_dic('exp/t_test_crf_only.dic')
+    # CRF
+    dic4 = load_dic('exp/t_test_bilstm.dic')
     
 
 

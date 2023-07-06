@@ -169,7 +169,10 @@ def run(ds_idx = 1, case_idx = 3, output_text = None):
 
 
 ###### 读取chatgpt_output.csv用以计算结果
-# 安部: '/home/taku/research/honda/achive/hitote/output.csv' 
+# 安部: '/home/taku/research/honda/achive/hitote/abe.csv' 
+# 三木: '/home/taku/research/honda/achive/hitote/miki.csv' 
+# 南山: '/home/taku/research/honda/achive/hitote/miki.csv' 
+# 尾崎: '/home/taku/research/honda/achive/hitote/ozaki.csv' 
 # chatgpt: '/home/taku/research/honda/achive/chatgpt/chatgpt_output.csv' 
 # gpt4: '/home/taku/research/honda/achive/gpt4/gpt4output.csv' 
 def cal_from_csv(path = './achive/chatgpt_output.csv'):
@@ -178,8 +181,8 @@ def cal_from_csv(path = './achive/chatgpt_output.csv'):
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
         for row in spamreader:
             datas.append(row)
-    titles = datas[0]
-    datas = datas[1:]
+    # titles = datas[0]
+    # datas = datas[1:]
     # 计算
     outputs = []
     labels = []
