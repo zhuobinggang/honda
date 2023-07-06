@@ -149,3 +149,48 @@ def script2():
 def best_checkpoints(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMAL', 'CRF', 'NORMAL_TITLE','CRF_TITLE'], repeat_index_range = range(3), return_paths = True):
     return dd2(directory_in_str, type_names, repeat_index_range, return_paths)
 
+
+### 删除所有不是最高的模型
+def deletable_redundant_models(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMAL', 'CRF', 'NORMAL_TITLE','CRF_TITLE'], repeat_index_range = range(3), return_paths = False, RP = 'RP'):
+    directory = os.fsencode(directory_in_str)
+    filepaths = [] # 获取文件路径
+    filenames = [] # 文件名
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        filenames.append(filename)
+        filepaths.append(f'{directory_in_str}{filename}')
+    res = np.zeros((5, len(type_names), len(repeat_index_range)))
+    best_checkpoint_paths = []
+    deletable_paths = []
+    for dataset_index in range(5):
+        best_checkpoint_by_dataset = []
+        for type_index, type_name in enumerate(type_names):
+            for index_counter, repeat_index in enumerate(repeat_index_range):
+            # TODO: 找到性能最高的checkpoint
+                best_dev = 0
+                the_test = 0
+                the_name = ''
+                the_path = ''
+                for name, path in zip(filenames, filepaths): # 遍历, 无所谓，只是15个文件名字符串处理而已
+                    pattern = f'{type_name}_{RP}{repeat_index}_DS{dataset_index}_.*'
+                    # if len(re.findall(pattern, name)) > 0:
+                    if re.match(pattern, name): # 不同step的处理，根据文件名读取数字
+                        deletable_paths.append(path)
+                        dev = float(re.findall('dev(0\.?\d*)', name)[0])
+                        if dev > best_dev:
+                            the_name = name
+                            the_path = path
+                            best_dev = dev
+                            test = float(re.findall('test(0\.?\d*)', name)[0])
+                            if test < the_test:
+                                print(f'! {test} is smaller than {the_test}')
+                            the_test = test
+                print(the_name)
+                best_checkpoint_by_dataset.append(the_path)
+                deletable_paths.remove(the_path)
+                res[dataset_index, type_index, index_counter] = the_test
+        best_checkpoint_paths.append(best_checkpoint_by_dataset) 
+    return deletable_paths
+
+
+

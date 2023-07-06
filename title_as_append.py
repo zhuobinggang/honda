@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from taku_subword_expand import Sector, encode_plus
+from taku_subword_expand import Sector, encode_plus # encode_plus: without title
 from taku_reader3 import ds_5div_reconstructed_with_title
 from common import train_and_save_checkpoints
 from main_crf import Sector_2022_CRF
@@ -23,6 +23,7 @@ class Sector_Title_Append(Sector):
         out_mlp = out_mlp.view(-1)  # (seq_len)
         return out_mlp
 
+# with title
 def encode_title_append(toker, tokens, title):
      ids_title = toker.encode(title ,add_special_tokens = False)
      ids_title.append(toker.sep_token_id) # 增加[SEP]

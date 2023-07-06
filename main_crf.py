@@ -76,6 +76,13 @@ class Sector_2022_CRF(nn.Module):
         loss = -self.crf(out_mlp, tags)
         return loss
 
+    # 和printer.py配合
+    def emphasize(self, item, threshold = 0.5):
+        out_mlp = self.forward(item)  # (1, seq_len, 2)
+        out_mlp = self.crf.decode(out_mlp)[0]
+        res = [True if res > threshold else False for res in out_mlp]
+        return res
+
     def test(self, ds):
         target_all = []
         result_all = []
