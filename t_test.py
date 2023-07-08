@@ -243,6 +243,45 @@ def f_score_by_articles_BILSTM_TITLE_CRF(dic = None):
         dic['BILSTM_TITLE_CRF'] += temp_fs.mean(0).tolist()
     return dic
 
+
+###################### RoBERTa ##################
+
+def roberta_common_func(checkpoint_name, instance_func, dic = None):
+    if dic is None:
+        dic = {}
+    dic[checkpoint_name] = []
+    test_datasets_by_art = dataset_5div_article()
+    # BERT
+    checkpoints = get_checkpoint_paths(checkpoint_name)
+    for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
+        temp_fs = [] # 3 * 67
+        for path_repeat in paths_dataset:
+            temp_temp_fs = []
+            model = instance_func()
+            checkpoint = torch.load(path_repeat)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            for art_idx, article in enumerate(articles):
+                prec, rec, f, _ = model.test(article)
+                print(f'{dataset_idx} {art_idx} : {f}')
+                temp_temp_fs.append(f)
+            temp_fs.append(temp_temp_fs)
+        temp_fs = np.array(temp_fs)
+        dic[checkpoint_name] += temp_fs.mean(0).tolist()
+    return dic
+
+
+def roberta(dic = None):
+    from roberta import Sector_Roberta
+    return roberta_common_func('ROBERTA', Sector_Roberta, dic)
+
+def roberta_title(dic = None):
+    from roberta import Sector_Roberta_Title
+    return roberta_common_func('ROBERTA_TITLE', Sector_Roberta_Title, dic)
+
+def roberta_title_crf(dic = None):
+    from roberta import Sector_Roberta_Title_Crf
+    return roberta_common_func('ROBERTA_TITLE_CRF', Sector_Roberta_Title_Crf, dic)
+
 ###################### 检定 ####################
 
 def t_test(dic = None):
@@ -265,6 +304,8 @@ def t_test(dic = None):
     dic3 = load_dic('exp/t_test_crf_only.dic')
     # CRF
     dic4 = load_dic('exp/t_test_bilstm.dic')
+    # RobertA
+    dic5 = load_dic('exp/t_test_roberta.dic')
     
 
 

@@ -25,10 +25,10 @@ class Sector_Roberta(Sector_2022):
             print('NOT SUPPORTED NOW!')
     def get_tokens(self, item):
         return item[0]
-    def get_title(self, item):
-        return item[-1]
+    def get_labels_from_input(self, item):
+        return item[1]
     def get_ids_and_heads(self, item):
-        ids, heads = encode_plus(self.toker, self.get_tokens(item), self.get_title(item)) # NO TITLE
+        ids, heads = encode_plus(self.get_tokens(item), self.toker) # NO TITLE
         return ids, heads
     def forward(self, item):
         ids, heads = self.get_ids_and_heads(item)
@@ -42,6 +42,8 @@ class Sector_Roberta(Sector_2022):
 
 
 class Sector_Roberta_Title(Sector_Roberta):
+    def get_title(self, item):
+        return item[-1]
     def get_ids_and_heads(self, item):
         ids, heads = encode_title_append(self.toker, self.get_tokens(item), self.get_title(item)) # With title
         return ids, heads
@@ -101,9 +103,9 @@ def run1():
 def run_batch(seed = 10, indexs = range(3), mtype = 0):
     torch.manual_seed(seed)
     np.random.seed(seed)
-    ds_trian, ds_test = ds_5div_reconstructed_with_title()
+    ds_trian_org, ds_test_org = ds_5div_reconstructed_with_title()
     for repeat in indexs:
-        for idx, (mess_train_dev, ds_test) in enumerate(zip(ds_trian, ds_test)):
+        for idx, (mess_train_dev, ds_test) in enumerate(zip(ds_trian_org, ds_test_org)):
             ds_train = mess_train_dev[:-500]
             ds_dev = mess_train_dev[-500:]
             if mtype == 0:
@@ -115,7 +117,7 @@ def run_batch(seed = 10, indexs = range(3), mtype = 0):
                 m = Sector_Roberta_Title()
                 train_and_save_checkpoints(m, f'ROBERTA_TITLE_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
             elif mtype == 2:
-                print('BILSTM_TITLE_CRF')
+                print('ROBERTA_TITLE_CRF')
                 m = Sector_Roberta_Title_Crf()
                 train_and_save_checkpoints(m, f'ROBERTA_TITLE_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
 

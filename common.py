@@ -201,8 +201,8 @@ def train_and_save_checkpoints(
         loser.add(np.mean(batch_loss))
         m.opter_step()
         if (step + 1) % check_step == 0: # Evalue
-            score_dev = m.test(ds_dev)
-            score_test = m.test(ds_test)
+            score_dev = m.test(ds_dev.copy())
+            score_test = m.test(ds_test.copy())
             beutiful_print_result(step, score_dev, score_test)
             if score_dev[2] > best_dev:
                 best_dev = score_dev[2]
