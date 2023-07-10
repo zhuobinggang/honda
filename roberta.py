@@ -1,6 +1,7 @@
 from transformers import AutoTokenizer, RobertaModel
 from main import Sector_2022
 from title_as_append import encode_title_append, encode_plus
+from taku_title import encode_plus_title
 from taku_reader3 import ds_5div_reconstructed_with_title
 import torch
 from torch import nn
@@ -48,6 +49,12 @@ class Sector_Roberta_Title(Sector_Roberta):
         ids, heads = encode_title_append(self.toker, self.get_tokens(item), self.get_title(item)) # With title
         return ids, heads
 
+class Sector_Roberta_Title_Mark(Sector_Roberta):
+    def get_title(self, item):
+        return item[-1]
+    def get_ids_and_heads(self, item):
+        ids, heads = encode_plus_title(self.toker, self.get_tokens(item), self.get_title(item)) # With title
+        return ids, heads
 
 class Sector_Roberta_Title_Crf(Sector_Roberta_Title):
     def init_hook(self):
@@ -120,8 +127,13 @@ def run_batch(seed = 10, indexs = range(3), mtype = 0):
                 print('ROBERTA_TITLE_CRF')
                 m = Sector_Roberta_Title_Crf()
                 train_and_save_checkpoints(m, f'ROBERTA_TITLE_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
+            elif mtype == 3:
+                print('ROBERTA_TITLE_MARK')
+                m = Sector_Roberta_Title_Mark()
+                train_and_save_checkpoints(m, f'ROBERTA_TITLE_MARK_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
 
 def run_all():
-    run_batch(mtype = 2)
-    run_batch(mtype = 0)
-    run_batch(mtype = 1)
+    # run_batch(mtype = 2)
+    # run_batch(mtype = 0)
+    # run_batch(mtype = 1)
+    run_batch(mtype = 3)
