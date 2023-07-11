@@ -173,6 +173,8 @@ def f_score_by_articles_BERT_TITLE2_CRF(dic = None):
     return dic
 
 
+
+
 ######################### BiLSTM ##############################
 def f_score_by_articles_BILSTM(dic = None):
     from compare_lstm import BILSTM
@@ -246,11 +248,12 @@ def f_score_by_articles_BILSTM_TITLE_CRF(dic = None):
 
 ###################### RoBERTa ##################
 
-def roberta_common_func(checkpoint_name, instance_func, dic = None):
+def common_func(checkpoint_name, instance_func, dic = None, test_datasets_by_art = None):
     if dic is None:
         dic = {}
     dic[checkpoint_name] = []
-    test_datasets_by_art = dataset_5div_article()
+    if test_datasets_by_art is None:
+        test_datasets_by_art = dataset_5div_article()
     # BERT
     checkpoints = get_checkpoint_paths(checkpoint_name)
     for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
@@ -269,18 +272,74 @@ def roberta_common_func(checkpoint_name, instance_func, dic = None):
         dic[checkpoint_name] += temp_fs.mean(0).tolist()
     return dic
 
+# 增加precision & recall
+def common_func_additional(checkpoint_name, instance_func, dic = None, test_datasets_by_art = None, key_name = None):
+    if dic is None:
+        dic = {}
+    if key_name is None:
+        key_name = checkpoint_name
+    dic[f'{key_name}_prec'] = []
+    dic[f'{key_name}_rec'] = []
+    dic[f'{key_name}_f'] = []
+    if test_datasets_by_art is None:
+        test_datasets_by_art = dataset_5div_article()
+    # BERT
+    checkpoints = get_checkpoint_paths(checkpoint_name)
+    for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
+        temp_fs = [] # 3 * 67
+        temp_precs = []
+        temp_recs = []
+        for path_repeat in paths_dataset:
+            temp_temp_fs = []
+            temp_temp_precs = []
+            temp_temp_recs = []
+            model = instance_func()
+            checkpoint = torch.load(path_repeat)
+            model.load_state_dict(checkpoint['model_state_dict'])
+            for art_idx, article in enumerate(articles):
+                prec, rec, f, _ = model.test(article)
+                print(f'{dataset_idx} {art_idx} : {f}')
+                temp_temp_fs.append(f)
+                temp_temp_precs.append(prec)
+                temp_temp_recs.append(rec)
+            temp_fs.append(temp_temp_fs)
+            temp_precs.append(temp_temp_precs)
+            temp_recs.append(temp_temp_recs)
+        temp_fs = np.array(temp_fs)
+        temp_precs = np.array(temp_precs)
+        temp_recs = np.array(temp_recs)
+        dic[f'{key_name}_f'] += temp_fs.mean(0).tolist()
+        dic[f'{key_name}_prec'] += temp_precs.mean(0).tolist()
+        dic[f'{key_name}_rec'] += temp_recs.mean(0).tolist()
+    return dic
 
 def roberta(dic = None):
     from roberta import Sector_Roberta
-    return roberta_common_func('ROBERTA', Sector_Roberta, dic)
+    return common_func('ROBERTA', Sector_Roberta, dic)
 
 def roberta_title(dic = None):
     from roberta import Sector_Roberta_Title
-    return roberta_common_func('ROBERTA_TITLE', Sector_Roberta_Title, dic)
+    return common_func('ROBERTA_TITLE', Sector_Roberta_Title, dic)
 
 def roberta_title_crf(dic = None):
     from roberta import Sector_Roberta_Title_Crf
-    return roberta_common_func('ROBERTA_TITLE_CRF', Sector_Roberta_Title_Crf, dic)
+    return common_func('ROBERTA_TITLE_CRF', Sector_Roberta_Title_Crf, dic)
+
+###################### TITLE as empty string #####################
+def bert_title_append_crf_empty_title(dic = None, title = False):
+    from title_as_append import Sector_Title_Append_CRF
+    # NOTE: Set title to empty string
+    empty_title_ds = dataset_5div_article()
+    if not title:
+        for ds in empty_title_ds:
+            for art in ds:
+                for idx, item in enumerate(art):
+                    art[idx] = item[:-1] + ('',)
+    else:
+        print('KEEP TITLE')
+    print(empty_title_ds[0][0][0])
+    return common_func_additional('SECTOR_TITLE_APPEND_CRF', Sector_Title_Append_CRF, dic, test_datasets_by_art = empty_title_ds)
+
 
 ###################### 检定 ####################
 

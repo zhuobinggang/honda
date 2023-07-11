@@ -1,5 +1,6 @@
 # 用title_as_append模型来强调新闻
-from title_as_append import Sector_Title_Append
+from title_as_append import Sector_Title_Append_CRF
+from t_test import get_checkpoint_paths
 import torch
 from functools import lru_cache
 
@@ -36,7 +37,7 @@ def raw_lines_to_cases(raw_lines = None):
     return ds
 
 
-class Model(Sector_Title_Append):
+class Model(Sector_Title_Append_CRF):
     def test(self):
         print('NOT SUPPORT NOW')
     def get_ids_and_heads(self, item):
@@ -49,7 +50,6 @@ class Model(Sector_Title_Append):
         ids = torch.LongTensor(ids)
         heads = [idx + 1 for idx in list(range(len(ids_text)))]
         return ids, heads
-
 
 def flatten(l):
     return [item for sublist in l for item in sublist]
@@ -66,6 +66,11 @@ def second_process_ds(ds_org = None):
         items = [{'title': title, 'text': s} for s in flatten(paras)]
         ds += items
     return ds
+
+def second_process_ds_by_path(path = '/home/taku/research/honda/data_five/news_exp2.ds'):
+    lines = read_raw_lines(path)
+    cases = raw_lines_to_cases(lines)
+    return second_process_ds(cases)
 
 # 稍微打印一下，从printer.py复制过来的
 def token_transfer_by_emphasizes(tokens, emphasizes, i, last, then):
@@ -89,11 +94,9 @@ def print_sentence(tokens, emphasizes):
     text = ''.join(tokens)
     return text
 
-@lru_cache(maxsize=None)
 def get_model_for_test():
-    from scorer import best_checkpoints
-    _, paths = best_checkpoints(type_names = ['SECTOR_TITLE_APPEND'], return_paths = True)
-    path = paths[0][0]
+    checkpoints = get_checkpoint_paths('SECTOR_TITLE_APPEND_CRF')
+    path = checkpoints[0][0]
     checkpoint = torch.load(path)
     model = Model()
     model.load_state_dict(checkpoint['model_state_dict'])
@@ -131,5 +134,6 @@ def run():
         ids = ids[heads]
         tokens = [model.toker.decode(idx) for idx in ids] 
         texts.append(print_sentence(tokens, emphasizes))
+    text = ''.join(texts).replace(' ', '').replace('##', '')
 
 

@@ -45,8 +45,8 @@ class Sector_CRF_Title(Sector_CRF):
 def encode_plus_title(toker, tokens, titles):
     # NOTE: 将tokens中所有的【和】换成双重引号
     tokens = [token.replace('【', '『').replace('】', '』') for token in tokens]
-    left_marker = toker.encode('【', add_special_tokens = False)[0]
-    right_marker = toker.encode('】', add_special_tokens = False)[0]
+    left_marker = toker.encode('【', add_special_tokens = False)
+    right_marker = toker.encode('】', add_special_tokens = False)
     ids_expand = []
     need_indexs = []
     for i in range(len(tokens)):
@@ -63,16 +63,16 @@ def encode_plus_title(toker, tokens, titles):
         if current_is_title:
             if not last_is_title: # 唯一需要特殊对待的情况
                 # False True 的情况，增加左标记
-                ids = [left_marker] + ids
+                ids = left_marker + ids
                 # 更新need_index
-                need_index += 1
+                need_index += len(left_marker)
             if not next_is_title:
                 # True False 的情况，增加右标记
-                ids = ids + [right_marker]
+                ids = ids + right_marker
         need_indexs.append(need_index)
         ids_expand += ids
     # Special Token
-    ids_expand = [2] + ids_expand + [3]
+    ids_expand = [toker.cls_token_id] + ids_expand + [toker.sep_token_id]
     need_indexs = [idx + 1 for idx in need_indexs]
     return torch.LongTensor(ids_expand), need_indexs
 
