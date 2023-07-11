@@ -158,7 +158,7 @@ class Sector_2022(nn.Module):
         res = [True if res > threshold else False for res in out_mlp]
         return res
 
-    def test(self, ds, threshold = 0.5, return_logits = False):
+    def test(self, ds, threshold = 0.5, return_logits = False, requires_ephasize_number = False):
         target_all = []
         result_all = []
         for item in ds:
@@ -171,10 +171,15 @@ class Sector_2022(nn.Module):
         results = [1 if res > threshold else 0 for res in logits]
         targets = flatten(target_all)
         score = cal_prec_rec_f1_v2(results, targets)
-        if return_logits:
-            return score, logits
-        else:
+        if not return_logits and not requires_ephasize_number:
             return score
+        else:
+            res = (score, )
+            if return_logits:
+                res += (logits, )
+            if requires_ephasize_number:
+                res += (sum(results), )
+            return res
 
     def opter_step(self):
         self.opter.step()

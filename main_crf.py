@@ -83,7 +83,7 @@ class Sector_2022_CRF(nn.Module):
         res = [True if res > threshold else False for res in out_mlp]
         return res
 
-    def test(self, ds):
+    def test(self, ds, requires_ephasize_number = False):
         target_all = []
         result_all = []
         for item in ds:
@@ -93,7 +93,10 @@ class Sector_2022_CRF(nn.Module):
         # flatten & calculate
         results = flatten(result_all)
         targets = flatten(target_all)
-        return cal_prec_rec_f1_v2(results, targets)
+        if requires_ephasize_number:
+            return cal_prec_rec_f1_v2(results, targets), sum(results)
+        else:
+            return cal_prec_rec_f1_v2(results, targets)
 
     def opter_step(self):
         self.opter.step()
