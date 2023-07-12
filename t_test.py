@@ -293,6 +293,20 @@ def roberta_title_append_crf(dic = None):
     from roberta import Sector_Roberta_Title_Append_Crf
     return common_func('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, dic)
 
+def roberta_crf(dic = None):
+    from roberta import Sector_Roberta_Crf
+    return common_func('ROBERTA_CRF', Sector_Roberta_Crf, dic)
+
+def roberta_batch_test():
+    dic = {}
+    _ = roberta(dic)
+    _ = roberta_crf(dic)
+    _ = roberta_title(dic)
+    _ = roberta_title_crf(dic)
+    _ = roberta_title_append(dic)
+    _ = roberta_title_append_crf(dic)
+    return dic
+
 ###################### TITLE as empty string #####################
 # 增加precision & recall
 def common_func_detail(checkpoint_name, instance_func, dic = None, test_datasets_by_art = None, key_name = None):

@@ -148,7 +148,7 @@ class Sector_Roberta_Title_Append_Crf(Sector_Roberta_Title_Append):
         out_mlp = self.crf.decode(out_mlp)[0]
         res = [True if res > threshold else False for res in out_mlp]
         return res
-    def test(self, ds):
+    def test(self, ds, requires_ephasize_number = False):
         target_all = []
         result_all = []
         for item in ds:
@@ -158,7 +158,10 @@ class Sector_Roberta_Title_Append_Crf(Sector_Roberta_Title_Append):
         # flatten & calculate
         results = flatten(result_all)
         targets = flatten(target_all)
-        return cal_prec_rec_f1_v2(results, targets)
+        if requires_ephasize_number:
+            return cal_prec_rec_f1_v2(results, targets), sum(results)
+        else:
+            return cal_prec_rec_f1_v2(results, targets)
 
 class Sector_Roberta_Title_Crf(Sector_Roberta_Title_Append_Crf):
     def get_title(self, item):
@@ -167,6 +170,10 @@ class Sector_Roberta_Title_Crf(Sector_Roberta_Title_Append_Crf):
         ids, heads = encode_plus_title_mark(self.toker, self.get_tokens(item), self.get_title(item)) # With title
         return ids, heads
 
+class Sector_Roberta_Crf(Sector_Roberta_Title_Append_Crf):
+    def get_ids_and_heads(self, item):
+        ids, heads = encode_plus(self.get_tokens(item), self.toker) # NO TITLE
+        return ids, heads
 
 def run1():
     model = Sector_Roberta()
@@ -205,6 +212,10 @@ def run_batch(seed = 10, indexs = range(3), mtype = 0):
                 print('ROBERTA_TITLE_APPEND_CRF')
                 m = Sector_Roberta_Title_Append_Crf()
                 train_and_save_checkpoints(m, f'ROBERTA_TITLE_APPEND_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
+            elif mtype == 5:
+                print('ROBERTA_CRF')
+                m = Sector_Roberta_Crf()
+                train_and_save_checkpoints(m, f'ROBERTA_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
 
 def run_all_1():
     run_batch(mtype = 0)
@@ -212,7 +223,8 @@ def run_all_1():
     run_batch(mtype = 2)
 
 def run_all_2():
-    run_batch(mtype = 3)
-    run_batch(mtype = 4)
+    # run_batch(mtype = 3)
+    # run_batch(mtype = 4)
+    run_batch(mtype = 5)
 
 
