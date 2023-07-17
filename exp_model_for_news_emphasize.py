@@ -1,5 +1,7 @@
 # 用title_as_append模型来强调新闻
 from title_as_append import Sector_Title_Append_CRF
+import roberta
+from roberta import Sector_Roberta_Title_Append_Crf
 from t_test import get_checkpoint_paths
 import torch
 from functools import lru_cache
@@ -51,6 +53,19 @@ class Model(Sector_Title_Append_CRF):
         heads = [idx + 1 for idx in list(range(len(ids_text)))]
         return ids, heads
 
+class Model_Roberta(Sector_Roberta_Title_Append_Crf):
+    def test(self):
+        print('NOT SUPPORT NOW')
+    def get_ids_and_heads(self, item):
+        toker = self.toker
+        ids_text = roberta.roberta_encode_token(item['text'], toker)
+        ids_title = roberta.roberta_encode_token(item['title'], toker)
+        ids = [toker.cls_token_id] + ids_text + [toker.sep_token_id] + ids_title + [toker.sep_token_id]
+        ids = torch.LongTensor(ids)
+        heads = [idx + 1 for idx in list(range(len(ids_text)))]
+        return ids, heads
+
+
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
@@ -94,19 +109,15 @@ def print_sentence(tokens, emphasizes):
     text = ''.join(tokens)
     return text
 
-def get_model_for_test():
-    checkpoints = get_checkpoint_paths('SECTOR_TITLE_APPEND_CRF')
+def get_model_for_test(key = 'SECTOR_TITLE_APPEND_CRF', instance_func = Model):
+    checkpoints = get_checkpoint_paths(key)
     path = checkpoints[0][0]
     checkpoint = torch.load(path)
-    model = Model()
+    model = instance_func()
     model.load_state_dict(checkpoint['model_state_dict'])
     return model
 
-def ds_without_title(ds):
-    ds = ds.copy()
-    for item in ds:
-        item['title'] = ''
-    return ds
+
 
 def emphasize(model = None, ds = None):
     if model is None:
@@ -123,10 +134,16 @@ def emphasize(model = None, ds = None):
     text = ''.join(texts).replace(' ', '').replace('##', '')
     return text
 
-def run():
-    model = get_model_for_test()
-    ds = second_process_ds()
-    print(len(ds))
+
+def ds_without_title(ds):
+    res = []
+    for item in ds:
+        res.append({'title': '', 'text': item['text']})
+    return res
+
+def common_script(model, ds, need_title = True):
+    if not need_title:
+        ds = ds_without_title(ds)
     texts = []
     for item in ds:
         emphasizes = model.emphasize(item)
@@ -135,5 +152,23 @@ def run():
         tokens = [model.toker.decode(idx) for idx in ids] 
         texts.append(print_sentence(tokens, emphasizes))
     text = ''.join(texts).replace(' ', '').replace('##', '')
+    return text
+
+def run_bert():
+    model = get_model_for_test()
+    ds = second_process_ds_by_path(path = '/home/taku/research/honda/data_five/news_exp2.ds')
+    text = common_script(model, ds, need_title = True)
+    text2 = common_script(model, ds, need_title = False)
+
+def run_roberta():
+    model = get_model_for_test(key = 'ROBERTA_TITLE_APPEND_CRF', instance_func = Model_Roberta)
+    ds = second_process_ds_by_path(path = '/home/taku/research/honda/data_five/news_exp2.ds')
+    text = common_script(model, ds, need_title = True)
+    text2 = common_script(model, ds, need_title = False)
+
+
+
+
+
 
 

@@ -248,6 +248,14 @@ def f_score_by_articles_BILSTM_TITLE_CRF(dic = None):
 
 ###################### RoBERTa ##################
 
+def load_first_best_model(checkpoint_name, instance_func):
+    # BERT
+    checkpoints = get_checkpoint_paths(checkpoint_name)
+    model = instance_func()
+    checkpoint = torch.load(checkpoints[0][0])
+    model.load_state_dict(checkpoint['model_state_dict'])
+    return model
+
 def common_func(checkpoint_name, instance_func, dic = None, test_datasets_by_art = None):
     if dic is None:
         dic = {}

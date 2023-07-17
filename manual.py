@@ -3,6 +3,8 @@ from chatgpt import cal_from_csv
 from title_as_append import Sector_Title_Append
 import torch
 from printer import *
+from t_test import load_first_best_model
+from common import flatten
 
 model_path = '/usr01/taku/checkpoint/honda/SECTOR_TITLE_APPEND_RP5_DS0_step2700_dev0.409_test0.436.checkpoint'
 
@@ -31,15 +33,7 @@ def load_model():
     model = model.requires_grad_(False) # Freeze
     return model
 
-def run_model():
-    arts = get_first_ten_article()
-    items = flatten(arts)
-    model = load_model()
-    # 打印
-    # emphasizes = [model.emphasize(item) for item in arts[0]]
-    # texts = [print_sentence(item, empha) for item, empha in zip(arts[0], emphasizes)]
-    score = model.test(flatten(arts))
-    return score
+
 
 def run_others():
     path = {
@@ -50,5 +44,14 @@ def run_others():
     cal_from_csv(path = path['安部'])
     cal_from_csv(path = path['chatgpt'])
     cal_from_csv(path = path['gpt4'])
+
+
+def run_model():
+    arts = get_first_ten_article()
+    items = flatten(arts)
+    from roberta import Sector_Roberta
+    model = load_first_best_model('ROBERTA', Sector_Roberta)
+    score = model.test(flatten(arts))
+    return score
 
 
