@@ -175,7 +175,8 @@ def run(ds_idx = 1, case_idx = 3, output_text = None):
 # 尾崎: '/home/taku/research/honda/achive/hitote/ozaki.csv' 
 # chatgpt: '/home/taku/research/honda/achive/chatgpt/chatgpt_output.csv' 
 # gpt4: '/home/taku/research/honda/achive/gpt4/gpt4output.csv' 
-def cal_from_csv(path = './achive/chatgpt_output.csv'):
+# NOTE: need_flatten = False, means will cal scores based on article level, instead of token level
+def cal_from_csv(path = './achive/chatgpt_output.csv', need_flatten = True):
     datas = []
     with open(path, newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -194,10 +195,15 @@ def cal_from_csv(path = './achive/chatgpt_output.csv'):
             case_idx = item[1]
             text = ','.join(item[2:])
             o, l = run(int(ds_idx), int(case_idx), text)
-            outputs += o
-            labels += l
-    print(cal_prec_rec_f1_v2(outputs, labels))
-    return outputs, labels
+            outputs.append(o)
+            labels.append(l)
+    if need_flatten:
+        outputs = flatten(outputs)
+        labels = flatten(labels)
+        return cal_prec_rec_f1_v2(outputs, labels)
+    else:
+        scores = [cal_prec_rec_f1_v2(o, l) for o, l in zip(outputs, labels)] 
+        return np.array(scores)
 
 
 

@@ -33,7 +33,7 @@ def load_dic(path = 'dd.dic'):
     import pickle
     return pickle.load(open(path,"rb"))
 
-def run():
+def run(indicator = 2, need_save_dic = True):
     f = open('crf_only.out', 'r')
     y_true = []
     y_pred = []
@@ -64,6 +64,7 @@ def run():
           p = p + 1
           y_pred_temp.append(1)
     # print(cal_prec_rec_f1_v2(y_pred, y_true))
-    article_fs = [cal_prec_rec_f1_v2(x, y)[2] for x, y in zip(y_pred, y_true)]
-    save_dic({'CRF': article_fs}, 't_test_crf_only.dic')
+    article_fs = [cal_prec_rec_f1_v2(x, y)[indicator] for x, y in zip(y_pred, y_true)]
+    if need_save_dic:
+        save_dic({'CRF': article_fs}, 't_test_crf_only.dic')
     return article_fs
