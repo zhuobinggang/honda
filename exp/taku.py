@@ -68,3 +68,75 @@ def run(indicator = 2, need_save_dic = True):
     if need_save_dic:
         save_dic({'CRF': article_fs}, 't_test_crf_only.dic')
     return article_fs
+
+
+def run_token_level(indicator = 2, need_save_dic = False):
+    f = open('crf_only.out', 'r')
+    y_true_temp = []
+    y_pred_temp = []
+    t = 0
+    p = 0
+    datalist = f.read().splitlines()
+    f.close()
+    for data in datalist:
+      list = data.split()
+      if 'DOCID' in list[0]:
+          ...
+      else:
+        if list[8] == 'O':
+          y_true_temp.append(0)
+        elif 'STRONG' in list[8]:
+          t = t + 1
+          y_true_temp.append(1)
+        if list[9] == 'O':
+          y_pred_temp.append(0)
+        elif 'STRONG' in list[9]:
+          p = p + 1
+          y_pred_temp.append(1)
+    y_true = y_true_temp
+    y_pred = y_pred_temp
+    # print(cal_prec_rec_f1_v2(y_pred, y_true))
+    res = cal_prec_rec_f1_v2(y_pred, y_true)
+    if need_save_dic:
+        # save_dic({'CRF': article_fs}, 't_test_crf_only.dic')
+        ...
+    return res
+
+def get_first_ten_scores(indicator = 2, need_save_dic = True):
+    f = open('crf_only.out', 'r')
+    y_true = []
+    y_pred = []
+    y_true_temp = []
+    y_pred_temp = []
+    t = 0
+    p = 0
+    datalist = f.read().splitlines()
+    f.close()
+    for data in datalist:
+      list = data.split()
+      if 'DOCID' in list[0]:
+        print("article")
+        # NOTE: NEW article and append result
+        y_true.append(y_true_temp)
+        y_pred.append(y_pred_temp)
+        y_true_temp = []
+        y_pred_temp = []
+      else:
+        if list[8] == 'O':
+          y_true_temp.append(0)
+        elif 'STRONG' in list[8]:
+          t = t + 1
+          y_true_temp.append(1)
+        if list[9] == 'O':
+          y_pred_temp.append(0)
+        elif 'STRONG' in list[9]:
+          p = p + 1
+          y_pred_temp.append(1)
+    # print(cal_prec_rec_f1_v2(y_pred, y_true))
+    xx = flatten(y_pred[:10])
+    yy = flatten(y_true[:10])
+    return cal_prec_rec_f1_v2(xx, yy)
+
+
+
+
