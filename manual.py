@@ -129,3 +129,18 @@ def get_fs_dic():
     return dic
 
 
+############################# 打印模型在第七个文章上的强调结果 ####################
+
+def print_case_7():
+    from roberta import Sector_Roberta_Title_Append
+    from printer import print_sentence
+    model = load_first_best_model('ROBERTA_TITLE_APPEND', Sector_Roberta_Title_Append)
+    arts = get_first_ten_article()
+    ds = arts[7]
+    emphasizes = [model.emphasize(item) for item in ds]
+    texts = [print_sentence(item, empha) for item, empha in zip(ds, emphasizes)]
+    return texts
+
+
+
+
