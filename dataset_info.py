@@ -2,7 +2,6 @@
 from taku_reader2 import Loader
 from functools import lru_cache
 from fugashi import Tagger
-from t_test import dataset_5div_article
 
 @lru_cache(maxsize=None)
 def read_ds_all():
@@ -23,6 +22,7 @@ def cal_emphasize_rate(ds_all = read_ds_all()):
     return IS_TITLE_RATE
 
 def infos():
+    from t_test import dataset_5div_article
     ds = []
     testsets = dataset_5div_article()
     for arts in testsets:
