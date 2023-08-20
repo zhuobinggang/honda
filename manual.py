@@ -53,6 +53,9 @@ def run_others():
 
 def common_func(instance_func, checkpoint_name, need_flatten = True):
     model = load_first_best_model(checkpoint_name, instance_func)
+    return common_func_by_model(model, need_flatten)
+
+def common_func_by_model(model, need_flatten = True):
     arts = get_first_ten_article()
     if need_flatten:
         score = model.test(flatten(arts))
@@ -124,23 +127,66 @@ def get_fs_dic():
     from exp import taku
     fs = taku.run(indicator = 2, need_save_dic = False)[:10]
     dic['crf'] = fs
-    from common import save_dic
-    save_dic(dic, '/home/taku/research/honda/exp/t_test_manual_10_articles_all_methods.dic')
-    return dic
+    # from common import save_dic
+    # save_dic(dic, '/home/taku/research/honda/exp/t_test_manual_10_articles_all_methods.dic')
+    # return dic
+    # Rule base: 第一句话强调？
+    # TODO:
+    fake_model = Rule_Based_Model()
+    rule_base_result = common_func_by_model(fake_model, need_flatten = False)
+    
+
+class Rule_Based_Model:
+    def test(self, ds):
+        from common import cal_prec_rec_f1_v2
+        y_pred = []
+        y_true = []
+        for idx, item in enumerate(ds):
+            labels = item[1]
+            if idx == 0:
+                y_pred += [1] * len(labels)
+            else:
+                y_pred += [0] * len(labels)
+            y_true += labels
+        return cal_prec_rec_f1_v2(y_pred, y_true)
 
 
 ############################# 打印模型在第七个文章上的强调结果 ####################
-
-def print_case_7():
-    from roberta import Sector_Roberta_Title_Append
+def print_case_7_common_func(instantiate_func, checkpoint_name):
     from printer import print_sentence
-    model = load_first_best_model('ROBERTA_TITLE_APPEND', Sector_Roberta_Title_Append)
+    model = load_first_best_model(checkpoint_name, instantiate_func)
     arts = get_first_ten_article()
     ds = arts[7]
     emphasizes = [model.emphasize(item) for item in ds]
-    texts = [print_sentence(item, empha) for item, empha in zip(ds, emphasizes)]
-    return texts
+    texts = [print_sentence(item, empha, need_title = False) for item, empha in zip(ds, emphasizes)]
+    return ''.join(texts)
 
+# 我们的手法
+def print_case_7():
+    from roberta import Sector_Roberta_Title_Append
+    return print_case_7_common_func(Sector_Roberta_Title_Append, 'ROBERTA_TITLE_APPEND')
 
+def print_case_7_without_title():
+    from roberta import Sector_Roberta_Crf
+    return print_case_7_common_func(Sector_Roberta_Crf, 'ROBERTA_CRF')
 
+def print_case_7_without_CRF():
+    from roberta import Sector_Roberta_Title_Append
+    return print_case_7_common_func(Sector_Roberta_Title_Append, 'ROBERTA_TITLE_APPEND')
+
+def print_case_7_without_RoBERTa():
+    from title_as_append import Sector_Title_Append_CRF
+    return print_case_7_common_func(Sector_Title_Append_CRF, 'SECTOR_TITLE_APPEND_CRF')
+
+def print_case_7_BILSTM():
+    from compare_lstm import BILSTM
+    return print_case_7_common_func(BILSTM, 'BILSTM')
+
+def print_case_7_BERT():
+    from taku_subword_expand import Sector
+    return print_case_7_common_func(Sector, 'NORMAL')
+
+def print_case_7_ROBERTA():
+    from roberta import Sector_Roberta
+    return print_case_7_common_func(Sector_Roberta, 'ROBERTA')
 

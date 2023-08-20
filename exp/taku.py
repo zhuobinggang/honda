@@ -69,7 +69,7 @@ def run(indicator = 2, need_save_dic = True):
         save_dic({'CRF': article_fs}, 't_test_crf_only.dic')
     return article_fs
 
-############################# 在论文中引用token等级的实验结果 ################################
+############################# 在论文中引用token等级的实验结果(整体评分的时候) ################################
 
 def run_token_level(indicator = 2, need_save_dic = False):
     f = open('crf_only.out', 'r')
@@ -141,7 +141,7 @@ def get_first_ten_scores(indicator = 2, need_save_dic = True):
 
 ################### CRF的输出例 ####################3
 
-def dd(indicator = 2):
+def print_case_7(indicator = 2):
     f = open('crf_only.out', 'r')
     datalist = f.read().splitlines()
     f.close()

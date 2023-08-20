@@ -47,7 +47,7 @@ def token_transfer_by_emphasizes(tokens, emphasizes, i, last, then):
             tokens[i] = tokens[i] + '</span>'
 
 
-def print_sentence(item, emphasizes = None):
+def print_sentence(item, emphasizes = None, need_title = True):
     tokens = item[0]
     ls = item[1]
     titles = item[2]
@@ -56,7 +56,8 @@ def print_sentence(item, emphasizes = None):
     for i in range(len(tokens)):
         last = i - 1
         then = i + 1
-        token_transfer_by_titles(tokens, titles, i, last, then)
+        if need_title:
+            token_transfer_by_titles(tokens, titles, i, last, then)
         token_transfer_by_labels(tokens, ls, i, last, then)
         if emphasizes:
             token_transfer_by_emphasizes(tokens, emphasizes, i, last, then)
