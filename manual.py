@@ -163,8 +163,8 @@ def print_case_7_common_func(instantiate_func, checkpoint_name):
 
 # 我们的手法
 def print_case_7():
-    from roberta import Sector_Roberta_Title_Append
-    return print_case_7_common_func(Sector_Roberta_Title_Append, 'ROBERTA_TITLE_APPEND')
+    from roberta import Sector_Roberta_Title_Append_Crf
+    return print_case_7_common_func(Sector_Roberta_Title_Append_Crf, 'ROBERTA_TITLE_APPEND_CRF')
 
 def print_case_7_without_title():
     from roberta import Sector_Roberta_Crf

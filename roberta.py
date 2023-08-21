@@ -119,6 +119,9 @@ class Sector_Roberta_Title(Sector_Roberta):
         return ids, heads
 
 
+
+# >>> model.toker.decode(ids)
+# '[CLS] w i n d o w s用のシステム設定アプリはたくさんありますが、なかでも米 l h編集部一番のお気に入りは 『ultimatewindowstweaker』です。[SEP] 米lh編集部イチオシのwindowsシステム設定アプリは『ultimatewindowstweaker』[SEP]'
 class Sector_Roberta_Title_Append_Crf(Sector_Roberta_Title_Append):
     def init_hook(self):
         self.classifier = nn.Sequential(  # 因为要同时判断多种1[sep]3, 2[sep]2, 3[sep]1, 所以多加一点复杂度
