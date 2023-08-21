@@ -58,16 +58,15 @@ class Roberta_Title_Append_Crf_Aux(Sector_Roberta_Title_Append_Crf):
     def forward(self, item, need_cls = False):
         ids, heads = self.get_ids_and_heads(item)
         # TODO: 给title编码，然后追加在后边
-        # (1, seq_len + 2, 768)
-        out_bert = self.bert(ids.unsqueeze(0).cuda()).last_hidden_state
-        out_bert = out_bert[:, heads, :]  # (1, seq_len, 768)
-        out_mlp = self.classifier(out_bert)  # (1, seq_len, 2)
+        out_bert = self.bert(ids.unsqueeze(0).cuda()).last_hidden_state # (1, seq_len + 2, 768)
+        out_bert_cls = out_bert[:, 0, :]
+        out_bert_heads = out_bert[:, heads, :]  # (1, seq_len, 768)
+        out_mlp = self.classifier(out_bert_heads)  # (1, seq_len, 2)
         if not need_cls:
             return out_mlp
         else:
-            out_bert_cls = out_bert[:, 0, :] # (1, 768)
+             # (1, 768)
             return out_mlp, out_bert_cls
-
 
 
 # 结果证明平均f值为0.432，但是没有辅助损失的0.437，具体看数值也没有特别突出的表现…
