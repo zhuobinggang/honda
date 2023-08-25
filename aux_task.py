@@ -69,7 +69,7 @@ class Roberta_Title_Append_Crf_Aux(Sector_Roberta_Title_Append_Crf):
             return out_mlp, out_bert_cls
 
 
-# 结果证明平均f值为0.432，但是没有辅助损失的0.437，具体看数值也没有特别突出的表现…
+# 结果证明平均f值为0.433666，但是没有辅助损失的0.437，具体看数值也没有特别突出的表现…
 # 看看辅助任务的得分有多少，算一下f值
 def run_batch(seed = 10, indexs = range(3), splits_until = 5, mtype = 0):
     from taku_reader3 import ds_5div_reconstructed_with_title
@@ -85,33 +85,27 @@ def run_batch(seed = 10, indexs = range(3), splits_until = 5, mtype = 0):
                 m = Roberta_Title_Append_Crf_Aux()
                 train_and_save_checkpoints(m, f'Roberta_Title_Append_Crf_Aux_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
 
-# NOTE: 判断一个句子是否需要强调的f值还不如强调的f值这也太怪了吧，理论上这个任务应该比强调简单多了
+# 判断一个句子是否需要强调的f值为0.456
 # 
-# array([[0.29459902, 0.35914333, 0.39753467],
-#        [0.47914646, 0.44254279, 0.49309245],
-#        [0.31619048, 0.4057971 , 0.31602709],
-#        [0.36614173, 0.41132075, 0.39344262],
-#        [0.42415317, 0.40863787, 0.3974359 ]])
-# mean = 0.39368
+# array([[0.47619048, 0.50591017, 0.48962656],
+#        [0.42918455, 0.48899013, 0.50257732],
+#        [0.39937598, 0.39530988, 0.43980738],
+#        [0.44122966, 0.43886097, 0.4389313 ],
+#        [0.46153846, 0.43478261, 0.50531915]])
+# mean = 0.4565089
 # 
-# 单纯在辅助任务上训练试试
-def cal_aux_score():
-    from taku_reader3 import ds_5div_reconstructed_with_title
-    from t_test import get_checkpoint_paths
-    _, test_datasets = ds_5div_reconstructed_with_title()
-    checkpoints = get_checkpoint_paths('Roberta_Title_Append_Crf_Aux')
-    fs = []
-    for dataset_idx, (paths_dataset, testset) in enumerate(zip(checkpoints, test_datasets)):
-        temp_fs = [] # 3
-        for path_repeat in paths_dataset:
-            model = Roberta_Title_Append_Crf_Aux()
-            checkpoint = torch.load(path_repeat)
-            model.load_state_dict(checkpoint['model_state_dict'])
-            prec, rec, f, _ = model.aux_test(testset)
-            print(f'{dataset_idx} : {f}')
-            temp_fs.append(f)
-        fs.append(temp_fs)
-    return fs
+# 单纯在辅助任务上训练的f值为0.5，如果将
+# 
+# array([[0.48186528, 0.50402145, 0.53902185],
+#        [0.52655889, 0.53410405, 0.5480427 ],
+#        [0.47798742, 0.49034175, 0.52835408],
+#        [0.43137255, 0.46153846, 0.50082372],
+#        [0.52615845, 0.49324324, 0.4893617 ]])
+# mean = 0.50218
+# 
+def cal_aux_score(instance_func = Roberta_Title_Append_Crf_Aux, checkpoint_name = 'Roberta_Title_Append_Crf_Aux'):
+    import common_aux
+    return common_aux.cal_aux_score(instance_func, checkpoint_name)
 
 ################################ STAGE 2 #################################
 
