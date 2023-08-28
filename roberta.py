@@ -230,4 +230,18 @@ def run_all_2():
     # run_batch(mtype = 4)
     run_batch(mtype = 5)
 
-
+##################### NOTE: 使用chatgpt生成的标题 ######################
+def run_batch_chatgpt_titles(seed = 10, indexs = range(3), mtype = 4):
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    ds_trian_title_chatgpt, _ = ds_5div_reconstructed_with_title(title_set = 1)
+    _, ds_test_org = ds_5div_reconstructed_with_title(title_set = 0)
+    for repeat in indexs:
+        for idx, (mess_train_dev, ds_test) in enumerate(zip(ds_trian_title_chatgpt, ds_test_org)):
+            ds_train = mess_train_dev[:-500]
+            ds_dev = mess_train_dev[-500:]
+            if mtype == 4:
+                key = 'ROBERTA_CHATGPT_TITLE_APPEND_CRF'
+                print(f'{key}, RP: {repeat}, IDX: {idx}')
+                m = Sector_Roberta_Title_Append_Crf()
+                train_and_save_checkpoints(m, f'{key}_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)

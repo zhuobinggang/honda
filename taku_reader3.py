@@ -40,17 +40,18 @@ def valid():
 
 ############################ 包含Title信息的loader #######################
 
-def read_ds_all_with_title():
+def read_ds_all_with_title(title_set = 0):
     res = []
     for idx, item in enumerate(read_ds_all()):
-        title = case_id_to_title(idx)
+        title = case_id_to_title(idx, title_set)
         res.append(item + (title, )) # tuple concat
     return res
 
+# title_set: 0 = original, 1 = chatgpt
 @lru_cache(maxsize=None)
-def ds_5div_reconstructed_with_title():
+def ds_5div_reconstructed_with_title(title_set = 0):
     # 手动找到每个test.txt的开始和最后一篇文章的下标就可以了
-    ds_all = read_ds_all_with_title()
+    ds_all = read_ds_all_with_title(title_set)
     test_lengths = [1587, 1730, 1257, 1181, 1384]
     test_ranges = get_testset_ranges(test_lengths)
     # test_ranges = [(0, 67), (67, 133), (133, 199), (199, 265), (265, 331)]

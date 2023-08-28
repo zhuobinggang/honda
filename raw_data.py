@@ -117,8 +117,22 @@ def titles_raw():
     return titles
 
 @lru_cache(maxsize=None)
-def case_id_to_title(idx):
+def case_id_to_title(idx, title_set = 0):
     sents_with_meta = get_sents_with_meta()
-    titles = titles_raw()
+    if title_set == 0:
+        titles = titles_raw()
+    elif title_set == 1:
+        titles = get_all_chatgpt_titles()
     sent, (article_idx, relative_sent_idx) = sents_with_meta[idx]
     return titles[article_idx]
+
+#################### NOTE: chatgpt生成的title ##################3
+
+@lru_cache(maxsize=None)
+def get_all_chatgpt_titles():
+    print('FIRST CALL: get_all_chatgpt_titles')
+    f = open('exp/titles_generated_by_chatgpt.txt.save')
+    titles = f.readlines()
+    titles = [s.strip() for s in titles]
+    f.close()
+    return titles
