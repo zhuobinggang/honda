@@ -38,20 +38,20 @@ def write_titles(titles):
     f.close()
 
 
-def run():
+def run(counter = 0):
     chatbot = Chatbot(config={"access_token": os.getenv('OPENAI_TOKEN')})
     texts = arts()
     titles = []
-    counter = 0
     while True:
         # Code executed here
         prompt = f'文章の一部でタイトルを作ってください: {texts[counter]}'
         print(prompt)
+        chatbot.reset_chat() # NOTE: NEED THIS TO AVOID HISTORY
         titles.append(request(chatbot, prompt))
         write_titles(titles)
         counter += 1
         print(f'{counter}\n\n')
-        time.sleep(60)
+        time.sleep(70)
     print('全部完成\n\n\n')
 
 
