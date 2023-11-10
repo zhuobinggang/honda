@@ -64,6 +64,7 @@ def encode_plus_title_mark(toker, tokens, titles):
     return torch.LongTensor(ids_expand), need_indexs
 
 # with title
+# NOTE: ROBERTA専用
 def encode_title_append(toker, tokens, title):
      ids_title = roberta_encode_token(title, toker)
      ids_title.append(toker.sep_token_id) # 增加[SEP]
@@ -231,13 +232,16 @@ def run_all_2():
     run_batch(mtype = 5)
 
 ##################### NOTE: 使用chatgpt生成的标题 ######################
+# mtype: 4 = RoBERTa + Generated TITLE + CRF
+# mtype: 5 = RoBERTa + Generated TITLE
+# mtype: 6 = RoBERTa + CRF
+# mtype: 7 = BERT + Generated TITLE + CRF
 def run_batch_chatgpt_titles(seed = 10, indexs = range(3), mtype = 4):
     torch.manual_seed(seed)
     np.random.seed(seed)
-    ds_trian_title_chatgpt, _ = ds_5div_reconstructed_with_title(title_set = 1)
-    _, ds_test_org = ds_5div_reconstructed_with_title(title_set = 0)
+    ds_trian_title_chatgpt, ds_test_title_chatgpt = ds_5div_reconstructed_with_title(title_set = 1)
     for repeat in indexs:
-        for idx, (mess_train_dev, ds_test) in enumerate(zip(ds_trian_title_chatgpt, ds_test_org)):
+        for idx, (mess_train_dev, ds_test) in enumerate(zip(ds_trian_title_chatgpt, ds_test_title_chatgpt)):
             ds_train = mess_train_dev[:-500]
             ds_dev = mess_train_dev[-500:]
             if mtype == 4:
@@ -245,3 +249,21 @@ def run_batch_chatgpt_titles(seed = 10, indexs = range(3), mtype = 4):
                 print(f'{key}, RP: {repeat}, IDX: {idx}')
                 m = Sector_Roberta_Title_Append_Crf()
                 train_and_save_checkpoints(m, f'{key}_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
+            elif mtype == 5:
+                key = 'ROBERTA_CHATGPT_TITLE_APPEND'
+                print(f'{key}, RP: {repeat}, IDX: {idx}')
+                m = Sector_Roberta_Title_Append()
+                train_and_save_checkpoints(m, f'{key}_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
+            elif mtype == 6:
+                print('Already Trained !!!!')
+            elif mtype == 7:
+                key = 'BERT_CHATGPT_TITLE_APPEND_CRF'
+                print(f'{key}, RP: {repeat}, IDX: {idx}')
+                from title_as_append import Sector_Title_Append_CRF
+                m = Sector_Title_Append_CRF()
+                train_and_save_checkpoints(m, f'{key}_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
+
+### 2023.9.20 Ablation
+def run_batch_ablation_920():
+    run_batch_chatgpt_titles(mtype = 7)
+    run_batch_chatgpt_titles(mtype = 5)

@@ -12,8 +12,8 @@ def get_checkpoint_paths(name):
 
 # 2. 将数据集加载成arts的结构
 # 如果title不同，换一个新的不就好了？
-def dataset_5div_article():
-    _, tests_reconstructed = ds_5div_reconstructed_with_title()
+def dataset_5div_article(title_set = 0):
+    _, tests_reconstructed = ds_5div_reconstructed_with_title(title_set)
     test_datasets_by_art = []
     for tds in tests_reconstructed:
         arts = []
@@ -256,12 +256,12 @@ def load_first_best_model(checkpoint_name, instance_func, strict = True):
     model.load_state_dict(checkpoint['model_state_dict'], strict = strict)
     return model
 
-def common_func(checkpoint_name, instance_func, dic = None, test_datasets_by_art = None):
+def common_func(checkpoint_name, instance_func, dic = None, test_datasets_by_art = None, title_set = 0):
     if dic is None:
         dic = {}
     dic[checkpoint_name] = []
     if test_datasets_by_art is None:
-        test_datasets_by_art = dataset_5div_article()
+        test_datasets_by_art = dataset_5div_article(title_set)
     # BERT
     checkpoints = get_checkpoint_paths(checkpoint_name)
     for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
@@ -314,6 +314,23 @@ def roberta_batch_test():
     _ = roberta_title_append(dic)
     _ = roberta_title_append_crf(dic)
     return dic
+
+def roberta_chatgpt_title_append_crf(dic = None):
+    from roberta import Sector_Roberta_Title_Append_Crf
+    return common_func('ROBERTA_CHATGPT_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, dic, title_set = 1)
+
+def ROBERTA_CHATGPT_TITLE_APPEND(dic = None):
+    from roberta import Sector_Roberta_Title_Append
+    return common_func('ROBERTA_CHATGPT_TITLE_APPEND', Sector_Roberta_Title_Append, dic, title_set = 1)
+
+def ROBERTA_CRF(dic = None):
+    from roberta import Sector_Roberta_Crf
+    return common_func('ROBERTA_CRF', Sector_Roberta_Crf, dic, title_set = 1)
+
+def BERT_CHATGPT_TITLE_APPEND_CRF(dic = None):
+    from title_as_append import Sector_Title_Append_CRF
+    return common_func('BERT_CHATGPT_TITLE_APPEND_CRF', Sector_Title_Append_CRF, dic, title_set = 1)
+
 
 ###################### TITLE as empty string #####################
 # 增加precision & recall
