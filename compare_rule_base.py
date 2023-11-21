@@ -4,38 +4,65 @@ import numpy as np
 # BILSTM + fasttext
 
 
-def last_sentence_emphasize(ds):
+def last_sentence_emphasize(ds, flat = True):
     target_all = []
     result_all = []
     for i in range(len(ds)):
-        _, ls, _, _ = ds[i]
+        ls = ds[i][1]
         target_all.append(ls)
         j = i + 1
         if j >= len(ds):
             # 将ds[i]的token全部强调
             result_all.append([1] * len(ls))
         else: 
-            _, _ , _, paragraph = ds[j]
+            paragraph = ds[j][3]
             if paragraph[0] == 1: # 如果下一个句子是段落的开头
                 # 将ds[i]的token全部强调
                 result_all.append([1] * len(ls))
             else:
                 # 将ds[i]的token全部非强调
                 result_all.append([0] * len(ls))
-    return result_all, target_all
+    if flat:
+        return flatten(result_all), flatten(target_all)
+    else: 
+        return result_all, target_all
 
-def first_sentence_emphasize(ds):
+def first_sentence_emphasize(ds, flat = True):
     target_all = []
     result_all = []
     for i in range(len(ds)):
-        _, ls, _, paras = ds[i]
+        ls = ds[i][1]
         target_all.append(ls)
+        paras = ds[i][3]
         if paras[0] == 1:
             result_all.append([1] * len(ls))
         else:
             result_all.append([0] * len(ls))
-    return result_all, target_all
+    if flat:
+        return flatten(result_all), flatten(target_all)
+    else: 
+        return result_all, target_all
 
+
+def first_and_last_sentence_emphasize(ds):
+    res1, tar1 = first_sentence_emphasize(ds)
+    res2, tar2 = last_sentence_emphasize(ds)
+    res_or = []
+    for item0, item1 in zip(res1, res2):
+        if item0 + item1 > 0:
+            res_or.append(1)
+        else:
+            res_or.append(0)
+    return res_or, tar1
+
+def all_one(ds):
+    target_all = []
+    result_all = []
+    for i in range(len(ds)):
+        ls = ds[i][1]
+        target_all.append(ls)
+        result_all.append([1] * len(ls))
+    return flatten(result_all), flatten(target_all)
 
 def performance(func):
     ld = Loader()
@@ -67,7 +94,7 @@ def random_emphasize(ds, neck = 0.3):
             out = 1 if np.random.rand() < neck else 0
             result.append(out)
         result_all.append(result)
-    return result_all, target_all
+    return flatten(result_all), flatten(target_all)
 
 def try_print():
     ds = Loader().read_tests(1)[0]

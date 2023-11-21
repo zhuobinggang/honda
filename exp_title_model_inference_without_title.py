@@ -89,7 +89,23 @@ def script_11102023():
     print_empty_title_emphasize_by_model(m, 0)
 
 
+####### 11.14.2023 用强调率替代强调数量 ###
     
+def script_11142023():
+    from t_test import *
+    import numpy as np
+    ds = dataset_5div_article()
+    arts = ds[0] + ds[1] + ds[2] + ds[3] + ds[4]
+    words_per_art = []
+    for art in arts:
+        total_words = 0
+        for item in art:
+            total_words += len(item[0])
+        words_per_art.append(total_words)
+    print(np.mean(words_per_art))
+
+
+
 
 
 
