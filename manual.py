@@ -3,7 +3,7 @@ from chatgpt import cal_from_csv
 from title_as_append import Sector_Title_Append
 import torch
 from printer import *
-from t_test import load_first_best_model
+from t_test import load_first_model
 from common import flatten
 from functools import lru_cache
 import numpy as np
@@ -52,7 +52,7 @@ def run_others():
 ############################# scripts #####################################
 
 def common_func(instance_func, checkpoint_name, need_flatten = True):
-    model = load_first_best_model(checkpoint_name, instance_func)
+    model = load_first_model(checkpoint_name, instance_func)
     return common_func_by_model(model, need_flatten)
 
 def common_func_by_model(model, need_flatten = True):
@@ -152,11 +152,11 @@ class Rule_Based_Model:
 
 
 ############################# 打印模型在第七个文章上的强调结果 ####################
-def print_case_7_common_func(instantiate_func, checkpoint_name):
+def print_case_7_common_func(instantiate_func, checkpoint_name, case_idx = 7):
     from printer import print_sentence
-    model = load_first_best_model(checkpoint_name, instantiate_func)
+    model = load_first_model(checkpoint_name, instantiate_func)
     arts = get_first_ten_article()
-    ds = arts[7]
+    ds = arts[case_idx]
     emphasizes = [model.emphasize(item) for item in ds]
     texts = [print_sentence(item, empha, need_title = False) for item, empha in zip(ds, emphasizes)]
     return ''.join(texts)

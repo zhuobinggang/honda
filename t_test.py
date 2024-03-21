@@ -247,8 +247,7 @@ def f_score_by_articles_BILSTM_TITLE_CRF(dic = None):
 
 
 ###################### RoBERTa ##################
-
-def load_first_best_model(checkpoint_name, instance_func, strict = True):
+def load_first_model(checkpoint_name, instance_func, strict = True):
     # BERT
     checkpoints = get_checkpoint_paths(checkpoint_name)
     model = instance_func()
