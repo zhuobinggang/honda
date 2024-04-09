@@ -3,7 +3,7 @@ from chatgpt import cal_from_csv
 from title_as_append import Sector_Title_Append
 import torch
 from printer import *
-from t_test import load_first_model
+from t_test import load_first_model, load_model
 from common import flatten
 from functools import lru_cache
 import numpy as np
@@ -29,13 +29,12 @@ def get_first_ten_article():
         arts.append(ds_all[starts[i]:starts[i+1]])
     return arts
 
-def load_model():
-    model = Sector_Title_Append()
-    checkpoint = torch.load(model_path)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    model = model.requires_grad_(False) # Freeze
-    return model
-
+# def load_model():
+#     model = Sector_Title_Append()
+#     checkpoint = torch.load(model_path)
+#     model.load_state_dict(checkpoint['model_state_dict'])
+#     model = model.requires_grad_(False) # Freeze
+#     return model
 
 
 def run_others():
@@ -52,6 +51,18 @@ def run_others():
 ############################# scripts #####################################
 
 def common_func(instance_func, checkpoint_name, need_flatten = True):
+    if not need_flatten:
+        print('Sorry I will keep it simple.')
+        need_flatten = True
+    cal = common_func_by_model
+    ress = []
+    for repeat_index in range(3):
+        model = load_model(checkpoint_name, instance_func, fold_index = 0, repeat_index = repeat_index)
+        ress.append(cal(model, need_flatten))
+    return np.array(ress)
+
+# old version of common_func, only calculate the first model's score
+def common_func_first_one(instance_func, checkpoint_name, need_flatten = True):
     model = load_first_model(checkpoint_name, instance_func)
     return common_func_by_model(model, need_flatten)
 
@@ -152,9 +163,10 @@ class Rule_Based_Model:
 
 
 ############################# 打印模型在第七个文章上的强调结果 ####################
-def print_case_7_common_func(instantiate_func, checkpoint_name, case_idx = 7):
+def print_case_7_common_func(instantiate_func, checkpoint_name, case_idx = 7, model_idx = 0):
     from printer import print_sentence
-    model = load_first_model(checkpoint_name, instantiate_func)
+    # model = load_first_model(checkpoint_name, instantiate_func)
+    model = load_model(checkpoint_name, instantiate_func, repeat_index = model_idx)
     arts = get_first_ten_article()
     ds = arts[case_idx]
     emphasizes = [model.emphasize(item) for item in ds]
@@ -162,13 +174,13 @@ def print_case_7_common_func(instantiate_func, checkpoint_name, case_idx = 7):
     return ''.join(texts)
 
 # 我们的手法
-def print_case_7():
+def print_case_7(case_idx = 7, model_idx = 0):
     from roberta import Sector_Roberta_Title_Append_Crf
-    return print_case_7_common_func(Sector_Roberta_Title_Append_Crf, 'ROBERTA_TITLE_APPEND_CRF')
+    return print_case_7_common_func(Sector_Roberta_Title_Append_Crf, 'ROBERTA_TITLE_APPEND_CRF', case_idx, model_idx)
 
-def print_case_7_without_title():
+def print_case_7_without_title(case_idx = 7):
     from roberta import Sector_Roberta_Crf
-    return print_case_7_common_func(Sector_Roberta_Crf, 'ROBERTA_CRF')
+    return print_case_7_common_func(Sector_Roberta_Crf, 'ROBERTA_CRF', case_idx)
 
 def print_case_7_without_CRF():
     from roberta import Sector_Roberta_Title_Append

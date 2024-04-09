@@ -249,9 +249,18 @@ def f_score_by_articles_BILSTM_TITLE_CRF(dic = None):
 ###################### RoBERTa ##################
 def load_first_model(checkpoint_name, instance_func, strict = True):
     # BERT
-    checkpoints = get_checkpoint_paths(checkpoint_name)
+    checkpoints = get_checkpoint_paths(checkpoint_name) # shape as (5, 3)
     model = instance_func()
     checkpoint = torch.load(checkpoints[0][0])
+    model.load_state_dict(checkpoint['model_state_dict'], strict = strict)
+    return model
+
+# Add 2024.3.21
+def load_model(checkpoint_name, instance_func, fold_index = 0, repeat_index = 0, strict = True):
+    # BERT
+    checkpoints = get_checkpoint_paths(checkpoint_name) # shape as (5, 3)
+    model = instance_func()
+    checkpoint = torch.load(checkpoints[fold_index][repeat_index])
     model.load_state_dict(checkpoint['model_state_dict'], strict = strict)
     return model
 
