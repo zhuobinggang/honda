@@ -2,6 +2,7 @@
 import numpy as np
 from common import flatten
 log = np.log
+from functools import lru_cache
 
 def read_train_test_set(idx):
     from t_test import dataset_5div_article
@@ -81,6 +82,14 @@ def term_num_per_doc(doc):
         term_num_dic[token] += 1
     return term_num_dic, total_token_num
 
+
+@lru_cache(maxsize=None)
+def read_and_build_dataset(idx):
+    print(f'READ AND BUILDING: DATASET {idx}')
+    trainset_doc_level, testset_doc_level = read_train_test_set(idx) # 0 ~ 4, 5 splits
+    trainset_doc_level, testset_doc_level = build_train_and_test(trainset_doc_level, testset_doc_level)
+    print(f'READ AND BUILDING: OVER')
+    return trainset_doc_level, testset_doc_level
 
 # Usage
 def script():

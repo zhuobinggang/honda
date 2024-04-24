@@ -107,7 +107,7 @@ class Sector_Roberta(Sector_2022):
 
 class Sector_Roberta_Title_Append(Sector_Roberta):
     def get_title(self, item):
-        return item[-1]
+        return item[4] # tokens, labels, is_title, para_first, title, tf_idf
     def get_ids_and_heads(self, item):
         ids, heads = encode_title_append(self.toker, self.get_tokens(item), self.get_title(item)) # With title
         return ids, heads
