@@ -225,4 +225,9 @@ def check_dataset():
             print(text)
 
 
+def topk_tokens(tokens, scores, k):
+    scores = np.array(scores)
+    max_idxs = scores.argsort()[::-1][:k]
+    return [tokens[idx] for idx in max_idxs]
+
 
