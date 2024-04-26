@@ -176,7 +176,8 @@ def check_gradient(model):
 ############# NOTE: 训练过程，因任务的不同而变，专属于NER
 def save_checkpoint(name, model, step, score_dev, score_test):
     import torch
-    PATH = f'/usr01/taku/checkpoint/honda/{name}_step{step + 1}_dev{round(score_dev[2], 3)}_test{round(score_test[2], 3)}.checkpoint'
+    # PATH = f'/usr01/taku/checkpoint/honda/{name}_step{step + 1}_dev{round(score_dev[2], 3)}_test{round(score_test[2], 3)}.checkpoint'
+    PATH = f'/usr01/taku/checkpoint/tfidf/{name}_step{step + 1}_dev{round(score_dev[2], 3)}_test{round(score_test[2], 3)}.checkpoint'
     score = {'dev': score_dev, 'test': score_test}
     torch.save({
             'model_state_dict': model.state_dict(),

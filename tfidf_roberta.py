@@ -37,11 +37,14 @@ def run():
     from tfidf import read_and_build_dataset
     for repeat in range(3):
         for split in range(5):
+            # Dataset prepare
             train_dev_set, test_set = read_and_build_dataset(split)
             train_dev_set = flatten(train_dev_set)
             trainset = train_dev_set[:-500]
             devset = train_dev_set[-500:]
             testset = flatten(test_set)
+            # Train
+            m = Sector_Roberta_Title_Append_Tfidf_Append()
             train_and_save_checkpoints(m, f'ROBERTA_TITLE_APPEND_TFIDF_RP{repeat}_DS{split}', trainset, devset, testset, check_step = 300, total_step = 3000)
 
 
