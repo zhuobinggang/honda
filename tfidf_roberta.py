@@ -2,6 +2,16 @@ from roberta import Sector_Roberta_Title_Append, encode_title_append, roberta_en
 import torch
 from common import flatten, train_and_save_checkpoints, cal_prec_rec_f1_v2, topk_tokens
 
+def case_print(item):
+    tokens = item[0]
+    title = item[4]
+    tfidf_scores = item[5]
+    top3tokens = topk_tokens(tokens, tfidf_scores, 3)
+    from main import get_toker
+    toker = get_toker()
+    ids, heads = encode_title_append_topk_tokens_append(toker, tokens, title, top3tokens)
+    return toker.decode(ids)
+
 # printed: [CLS] まだまだ寒い日が続きますが、本格的な春は刻 一刻と近づいてきています。[SEP] 辛い症状に負けないための「花粉症・アレルギー対策」特集を行います![SEP] 刻,一刻,春[SEP]
 def encode_title_append_topk_tokens_append(toker, tokens, title, topk_tokens):
     # title encode

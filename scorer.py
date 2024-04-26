@@ -7,6 +7,9 @@ import torch
 directory_in_str = '/usr01/taku/checkpoint/honda/best/vanilla/'
 directory_in_str2 = '/usr01/taku/checkpoint/honda/best/crf/'
 
+TRAINED_MODEL_DIR = '/usr01/taku/checkpoint/honda/'
+TRAINED_MODEL_DIR_TFIDF = '/usr01/taku/checkpoint/tfidf/'
+
 def dd(directory_in_str):
     directory = os.fsencode(directory_in_str)
     filepaths = [] # 获取文件路径
@@ -42,7 +45,7 @@ def dd(directory_in_str):
 
 
 # NOTE: 不需要手动，也不需要实际上加载checkpoint
-def dd2(directory_in_str = '/usr01/taku/checkpoint/honda/', type_names = ['NORMAL', 'CRF', 'NORMAL_TITLE','CRF_TITLE'], repeat_index_range = range(3), return_paths = False):
+def dd2(directory_in_str = TRAINED_MODEL_DIR_TFIDF, type_names = ['NORMAL', 'CRF', 'NORMAL_TITLE','CRF_TITLE'], repeat_index_range = range(3), return_paths = False):
     directory = os.fsencode(directory_in_str)
     filepaths = [] # 获取文件路径
     filenames = [] # 文件名

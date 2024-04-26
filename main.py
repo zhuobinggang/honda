@@ -8,10 +8,15 @@ torch = t
 numpy = np
 nn = t.nn
 F = t.nn.functional
+from functools import lru_cache
 
 RANDOM_SEEDs = [21, 22, 8, 29, 1648, 1, 2]
 DATASET_ORDER_SEED = 0
 
+@lru_cache(maxsize=None)
+def get_toker():
+    toker = BertJapaneseTokenizer.from_pretrained('cl-tohoku/bert-base-japanese-whole-word-masking')
+    return toker
 
 def label_to_number(case):
     tokens, labels = case
