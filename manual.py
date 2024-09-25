@@ -11,7 +11,7 @@ import numpy as np
 model_path = '/usr01/taku/checkpoint/honda/SECTOR_TITLE_APPEND_RP5_DS0_step2700_dev0.409_test0.436.checkpoint'
 
 @lru_cache(maxsize=None)
-def get_first_ten_article():
+def get_first_ten_article(number = 10):
     count = 0
     ds_all = read_ds_all_with_title()
     title = ''
@@ -22,12 +22,41 @@ def get_first_ten_article():
             title = current_title
             starts.append(idx)
             count += 1
-            if count > 10:
+            if count > number:
                 break
     arts = []
-    for i in range(10):
+    for i in range(number):
         arts.append(ds_all[starts[i]:starts[i+1]])
     return arts
+
+
+def print_art(art):
+    result_txt = ''
+    for item in art:
+        tokens = item[0]
+        result_txt += ''.join(tokens)
+    return result_txt
+
+# For one-shot example
+def print_with_emphasis_mark(art):
+    result_txt = ''
+    tokens = []
+    labels = []
+    for item in art:
+        tokens += item[0]
+        labels += item[1]
+    for i in range(len(tokens)):
+        prev_label = labels[i-1] if i > 0 else 0
+        cur_label = labels[i]
+        if cur_label != prev_label:
+            if cur_label == 1:
+                result_txt += f'**{tokens[i]}'
+            elif cur_label == 0:
+                result_txt += f'**{tokens[i]}'
+        else:
+            result_txt += tokens[i]
+    return result_txt
+
 
 # def load_model():
 #     model = Sector_Title_Append()
