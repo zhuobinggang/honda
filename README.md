@@ -61,5 +61,9 @@ print(case0_pred)
 case0_true = result_no_crf_raw['dataset0']['model0']['y_true'][0]
 ```
 
+## 2024.9.25 打印论文中的case
 
-
+```py
+from printer import print_paper_case
+print_paper_case(0)
+```

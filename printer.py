@@ -111,3 +111,22 @@ def script():
     emphasizes = [model.emphasize(item) for item in ds[:100]]
     texts = [print_sentence(item, empha) for item, empha in zip(ds[:100], emphasizes)]
     return texts
+
+
+# added 2024.9.20 打印提案手法在论文中提到的例子中的强调结果
+
+def print_paper_case(repeat_idx):
+    prefix = '/usr01/taku/checkpoint/honda/'
+    paths = ['ROBERTA_TITLE_APPEND_CRF_RP0_DS0_step1800_dev0.462_test0.462.checkpoint', 'ROBERTA_TITLE_APPEND_CRF_RP1_DS0_step2100_dev0.414_test0.414.checkpoint', 'ROBERTA_TITLE_APPEND_CRF_RP2_DS0_step1800_dev0.417_test0.432.checkpoint']
+    paths = [prefix + path for path in paths]
+    from roberta import Sector_Roberta_Title_Append_Crf
+    model = Sector_Roberta_Title_Append_Crf()
+    checkpoint = torch.load(paths[repeat_idx])
+    model.load_state_dict(checkpoint['model_state_dict'])
+    # Load target article
+    from taku_reader3 import test_articles_by_fold
+    the_art = test_articles_by_fold(0)[3]
+    model.eval()
+    emphasizes = [model.emphasize(item) for item in the_art]
+    texts = [print_sentence(item, empha) for item, empha in zip(the_art, emphasizes)]
+    return texts
