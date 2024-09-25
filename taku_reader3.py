@@ -60,7 +60,7 @@ def ds_5div_reconstructed_with_title(title_set = 0):
     return trains_reconstructed, tests_reconstructed
 
 
-# 增加可以读取article单位的函数
+# 增加可以读取article单位的函数(2024.9)
 @lru_cache(maxsize=None)
 def test_articles_by_fold(dataset_index):
     _, tests = ds_5div_reconstructed_with_title()
@@ -70,6 +70,28 @@ def test_articles_by_fold(dataset_index):
     start_idx = []
     arts = []
     for idx, item in enumerate(tests[dataset_index]):
+        tokens = item[0]
+        title = item[-1]
+        if title != prev_title:
+            arts.append([])
+            raw_datas.append((prev_title, text))
+            prev_title = title
+            text = ''
+            start_idx.append(idx)
+        text += ''.join(tokens)
+        arts[-1].append(item)
+    return arts
+
+# 增加可以读取article单位的函数(2024.9)
+@lru_cache(maxsize=None)
+def train_articles_by_fold(dataset_index):
+    trains, _ = ds_5div_reconstructed_with_title()
+    prev_title = ''
+    text = ''
+    raw_datas = []
+    start_idx = []
+    arts = []
+    for idx, item in enumerate(trains[dataset_index]):
         tokens = item[0]
         title = item[-1]
         if title != prev_title:
