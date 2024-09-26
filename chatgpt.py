@@ -37,10 +37,10 @@ def script():
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
-def cal(output_text, items, mark = '**'):
+def cal(output_text, article, mark = '**'):
     # TODO: 确保items中每一个token都能对应上output_text
     output_text = output_text.replace(' ', '')
-    tokens = flatten([item[0] for item in items])
+    tokens = flatten([item[0] for item in article])
     start = 0
     emphasize_buff = []
     outputs = []
@@ -84,7 +84,7 @@ def cal(output_text, items, mark = '**'):
     if start < len(output_text):
         emphasized_text = ''.join(emphasize_buff)
         print(f'EMPHASIZE END: {emphasized_text}')
-    labels = flatten([item[1] for item in items])
+    labels = flatten([item[1] for item in article])
     return outputs, labels
         
 

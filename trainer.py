@@ -252,8 +252,11 @@ def save_checkpoint(model_wrapper):
     model_wrapper.save_checkpoint()
 
 def calc_f1_scores_by_article(model_wrapper, ds):
-    results = calc_rouges(model_wrapper, ds, scorer_keys = ['rouge1'], need_article_level_score = True)
-    return [result['rouge1'].fmeasure for result in results]
+    # results = calc_rouges(model_wrapper, ds, scorer_keys = ['rouge1'], need_article_level_score = True)
+    # return [result['rouge1'].fmeasure for result in results]
+    scores = [calc_exact_score(model_wrapper, [article]) for article in ds]
+    assert len(scores) == len(ds)
+    return [score[2] for score in scores]
 
 def calc_rouge1(model_wrapper, ds):
     return calc_rouges(model_wrapper, ds, scorer_keys = ['rouge1'])
