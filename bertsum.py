@@ -119,6 +119,7 @@ BERTSUM.__name__ = 'BERTSUM'
 
 # =====================  因为很麻烦所以直接在同一个文件写运行代码 ========================
 
+# TODO: 在wrapper里面有针对摘要任务设计的test()函数，需要更换为f值评价
 def run():
     from trainer import ModelWrapper, train_and_plot, Rouge_Logger
     for fold_index in range(5):
