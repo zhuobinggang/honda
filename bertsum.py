@@ -119,9 +119,10 @@ BERTSUM.__name__ = 'BERTSUM'
 
 # =====================  因为很麻烦所以直接在同一个文件写运行代码 ========================
 
-# TODO: 在wrapper里面有针对摘要任务设计的test()函数，需要更换为f值评价
+# 在wrapper里面有针对摘要任务设计的test()函数，已经更换为f值评价
+# NOTE: 2024.9.26 根据run_test()得到的loss图判断300步左右时候已经完成训练
 def run():
-    from trainer import ModelWrapper, train_and_plot, Rouge_Logger
+    from trainer import ModelWrapper, train_and_plot, Logger
     for fold_index in range(5):
         # 获取数据集
         train_set, dev_set, test_set = read_dataset_by_article_with_devset(fold_index=fold_index)
@@ -130,6 +131,17 @@ def run():
             model_wrapper = ModelWrapper(BERTSUM())
             model_wrapper.set_meta(fold_index=fold_index, repeat_index=repeat_index)
             print(model_wrapper.get_name())
-            logger = Rouge_Logger(model_wrapper.get_name())  # 添加日志记录器
+            logger = Logger(model_wrapper.get_name())  # 添加日志记录器
             # 训练模型并打印结果
-            train_and_plot(model_wrapper, train_set, dev_set, test_set, batch_size=16, check_step=10, total_step=100, logger=logger)  # 添加logger参数
+            train_and_plot(model_wrapper, train_set, dev_set, test_set, batch_size=16, check_step=30, total_step=300, logger=logger)  # 添加logger参数
+
+def run_test():
+    from trainer import ModelWrapper, train_and_plot, Logger
+    train_set, dev_set, test_set = read_dataset_by_article_with_devset(fold_index=0)
+    # 初始化模型
+    model_wrapper = ModelWrapper(BERTSUM())
+    model_wrapper.set_meta(fold_index=999, repeat_index=999)
+    print(model_wrapper.get_name())
+    logger = Logger(model_wrapper.get_name())  # 添加日志记录器
+    # 训练模型并打印结果
+    train_and_plot(model_wrapper, train_set, dev_set, test_set, batch_size=16, check_step=30, total_step=300, logger=logger)  # 添加logger参数

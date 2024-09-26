@@ -47,7 +47,7 @@ class ModelWrapper:
     def __init__(self, m):
         self.m = m
         self.model = m
-        self.path_prefix = '/usr01/taku/checkpoint/bbc_news_emphasis/'
+        self.path_prefix = '/usr01/taku/checkpoint/honda_new/'
         self.suffix = '.checkpoint'
         self.fold_index = 999
         self.repeat_index = 999
@@ -89,9 +89,15 @@ class ModelWrapper:
 def calc_exact_score(model_wrapper, ds):
     labels = []
     results = []
-    for item in ds:
-        results.extend(model_wrapper.predict(item))
-        labels.extend(item['labels'])
+    for article in ds:
+        article_result = model_wrapper.predict(article)
+        assert len(article) == len(article_result)
+        for sentence_idx, item in enumerate(article):
+            labels_by_token = item[1]
+            labels.extend(labels_by_token)
+            results.extend([article_result[sentence_idx]] * len(labels_by_token))
+        # labels.append(1 if sum(item[1]) > 0 else 0)
+    assert len(results) == len(labels)
     return cal_prec_rec_f1_v2(results, labels)
 
 class Infinite_Dataset:
