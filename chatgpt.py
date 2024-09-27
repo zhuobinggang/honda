@@ -205,5 +205,57 @@ def cal_from_csv(path = './achive/chatgpt_output.csv', need_flatten = True):
         scores = [cal_prec_rec_f1_v2(o, l) for o, l in zip(outputs, labels)] 
         return np.array(scores)
 
+def random_ten_training_cases(cut = True, article_count = 10):
+    from taku_reader3 import train_articles_by_fold
+    train_articles = train_articles_by_fold(0)
+    # Random select 10 articles
+    import numpy as np
+    np.random.seed(42)
+    np.random.shuffle(train_articles)
+    ten_random_arts = train_articles[:article_count]
+    titles = [art[0][-1] for art in ten_random_arts]
+    # check string length
+    from manual import print_with_emphasis_mark
+    oneshot_samples = [print_with_emphasis_mark(art) for art in ten_random_arts]
+    lengths = [len(sample) for sample in oneshot_samples]
+    print(lengths)
+    # Cut cases with average length
+    if cut:
+        max_length = int(np.mean(lengths))
+        cutted_samples = []
+        for sample in oneshot_samples:
+            if len(sample) > max_length - 1:
+                sample = sample[:(max_length - 1)]
+                sample += '…'
+            cutted_samples.append(sample)
+        return cutted_samples, titles
+    else:
+        return oneshot_samples, titles
+    
 
+def art_to_text_and_title(art):
+    text = ''
+    for item in art:
+        text += ''.join(item[0]) 
+    title = art[0][-1]
+    return text, title
+
+# 2024.9.27 生成十个prompts其中的oneshot例子是从学习集中随机挑选的十个
+def prompts_generate_with_random_oneshot_sample(article_count = 10):
+    oneshot_samples, sample_titles = random_ten_training_cases(cut = True, article_count = article_count)
+    # read ten articles
+    from taku_reader3 import test_articles_by_fold
+    articles = test_articles_by_fold(0)[:article_count]
+    prompts = []
+    for art, sample, sample_title in zip(articles, oneshot_samples, sample_titles):
+        prompt = ''
+        prompt += 'Please refer to the title and put boldface emphasis on the text you think is important.\n'
+        prompt += '- Example(use ** to mark as emphasis):\n'
+        prompt += f'- Title: {sample_title}\n'
+        prompt += f'- Text: {sample}\n'
+        text, title = art_to_text_and_title(art)
+        prompt += f'Title: {title}\n'
+        prompt += f'Text: {text}\n'
+        prompts.append(prompt)
+    return prompts
 

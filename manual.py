@@ -1,7 +1,6 @@
 from taku_reader3 import read_ds_all_with_title
 from chatgpt import cal_from_csv
 from title_as_append import Sector_Title_Append
-import torch
 from printer import *
 from t_test import load_first_model, load_model
 from common import flatten

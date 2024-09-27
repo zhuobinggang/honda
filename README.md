@@ -67,3 +67,15 @@ case0_true = result_no_crf_raw['dataset0']['model0']['y_true'][0]
 from printer import print_paper_case
 print_paper_case(0)
 ```
+
+## 2024.9.27 使用学习数据集中随机10个case来组装prompt用于缓和one-shot导致的性能下降
+
+读取随机samples
+
+```py
+from chatgpt import random_ten_training_cases
+for sample, title in random_ten_training_cases(cut = True):
+    print(title)
+    print(sample)
+```
+
