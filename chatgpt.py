@@ -87,6 +87,9 @@ def cal(output_text, article, mark = '**'):
     labels = flatten([item[1] for item in article])
     return outputs, labels
         
+def cal_and_cal(text, article):
+    from common import cal_prec_rec_f1_v2
+    return cal_prec_rec_f1_v2(*cal(text, article))
 
 def test_cal():
     outputs = []

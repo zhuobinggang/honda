@@ -79,3 +79,25 @@ for sample, title in random_ten_training_cases(cut = True):
     print(sample)
 ```
 
+## 2024.9.30 从llm输出中计算分数的方法
+
+1. 检查输出符合要求
+
+主要使用`chatgpt.py`文件中的cal函数，该函数会自动比较文本，如果出现错误会报错，再手动更改原文件以符合要求即可。
+
+```py
+from chatgpt import cal_and_cal
+from taku_reader3 import test_articles_by_fold
+articles = test_articles_by_fold(0)[:10]
+text = '复制文本'
+cal_and_cal(text, articles[index])
+```
+
+2. 制作csv文件
+
+确认所有的输出符合要求之后，将输出复制到csv文件中。这个需要一行一行复制。手工操作。
+
+3. 计算整体得分
+
+最后使用同一个文件中的cal_from_csv函数就可以计算整体分数。
+
