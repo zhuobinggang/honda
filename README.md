@@ -101,3 +101,32 @@ cal_and_cal(text, articles[index])
 
 最后使用同一个文件中的cal_from_csv函数就可以计算整体分数。
 
+
+## 2024.9.30 对BERTSUM和提案手法进行t检定
+
+1. 首先读取提案手法的结果
+
+```py
+from t_test import load_dic
+dic = load_dic('exp/t_test_roberta.dic')
+our_scores = dic['ROBERTA_TITLE_APPEND_CRF'] # 331 f-scores
+```
+
+2. 计算bertsum的结果并保存
+
+```py
+from t_test_bertsum import t_test, save_score_dic
+from bertsum import BERTSUM
+dic = t_test([BERTSUM])
+save_score_dic(dic)
+bertsum_scores = dic['BERTSUM']
+```
+
+3. 使用scipy进行wilcoxon检定
+
+```py
+from scipy import stats
+_, p_value = stats.wilcoxon(bertsum_scores, our_scores)
+# >>> p_value
+# 5.542858751971058e-20
+```

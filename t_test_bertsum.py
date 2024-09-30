@@ -23,12 +23,12 @@ def save_score_dict(score_dict):
     # 获取当前时间并格式化
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     # 在文件名中添加当前时间
-    with open(f't_test/t_test_scores_{current_time}.json', 'w') as f:
+    with open(f'exp/t_test_bertsum_{current_time}.json', 'w') as f:
         json.dump(score_dict, f)
 
-def load_score_dict(file_name):
+def load_score_dict(file_path):
     import json
-    with open(f't_test_results/{file_name}', 'r') as f:
+    with open(file_path, 'r') as f:
         return json.load(f)
 
 def t_test(classes):
@@ -94,7 +94,7 @@ def t_test_add_modules():
     t_test(classes)
 
 # 2024.9.26 output -> array([[0.25679503, 0.46941941, 0.31864531]])
-def average_score_by_dataset_add_modules():
+def average_score():
     import numpy as np
     from bertsum import BERTSUM
     classes = [BERTSUM]
@@ -113,7 +113,7 @@ def average_score_by_dataset_add_modules():
     scores_mean_by_repeat = np.mean(scores, axis=2)
     scores_mean_by_dataset = np.mean(scores_mean_by_repeat, axis=1)
     print(scores_mean_by_dataset)
-    return scores_mean_by_dataset
+    return scores_mean_by_dataset, scores
 
 if __name__ == "__main__":
     t_test_add_modules()
