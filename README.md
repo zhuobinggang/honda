@@ -86,7 +86,7 @@ for sample, title in random_ten_training_cases(cut = True):
 主要使用`chatgpt.py`文件中的cal函数，该函数会自动比较文本，如果出现错误会报错，再手动更改原文件以符合要求即可。
 
 ```py
-from chatgpt import cal_and_cal
+from chatgpt import cal_and_cal, cal_from_csv
 from taku_reader3 import test_articles_by_fold
 articles = test_articles_by_fold(0)[:10]
 text = '复制文本'
