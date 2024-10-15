@@ -23,32 +23,26 @@ def empty_title_item(item):
 def sign_test(after_weights, before_weights):
     import numpy as np
     from scipy import stats
-    
+    after_weights = np.array(after_weights)
+    before_weights = np.array(before_weights)
     # Define before and after weights
-    
     # Calculate differences
     differences = after_weights - before_weights
-    
     # Remove zeros (no change)
     differences = differences[differences != 0]
-    
     # Calculate the number of positive (weight gain) and negative (weight loss) differences
     n_pos = np.sum(differences > 0)
     n_neg = np.sum(differences < 0)
-    
     # We use the smaller of n_pos and n_neg as our test statistic (for a two-tailed test)
     n = np.min([n_pos, n_neg])
-    
     # Calculate p-value (two-tailed) using the binomial test
     p_value = stats.binom_test(n, n=n_pos + n_neg, p=0.5, alternative='two-sided')
-    
     print(f'p-value: {p_value}')
-    
     # Interpret the p-value
     if p_value < 0.05:
-        print("We reject the null hypothesis: the diet program appears to have a significant effect on weight.")
+        print("Sign test: We reject the null hypothesis: the diet program appears to have a significant effect on weight.")
     else:
-        print("We fail to reject the null hypothesis: the diet program does not appear to have a significant effect on weight.")
+        print("Sign test: We fail to reject the null hypothesis: the diet program does not appear to have a significant effect on weight.")
 # =============== Fundamental functions End ==================
 
 # =============== cal_sentence_level_empty_emphasis_rate =================
@@ -120,8 +114,9 @@ def cal_emphasis_rate_batch_sign_test(cal_func):
     # label token percentage
     print(f'Label percentage: {sum(labels)} / {len(labels)} = {(sum(labels) / len(labels)) * 100 :.2f}%')
     # 进行wilcoxon检定
-    from scipy import stats
-    return stats.wilcoxon(with_title_results, no_title_results)
+    # from scipy import stats
+    # return stats.wilcoxon(with_title_results, no_title_results)
+    sign_test(no_title_results, with_title_results)
 
 
 # =============== cal_sentence_level_empty_emphasis_rate END =================

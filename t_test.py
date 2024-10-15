@@ -264,6 +264,7 @@ def load_model(checkpoint_name, instance_func, fold_index = 0, repeat_index = 0,
     model.load_state_dict(checkpoint['model_state_dict'], strict = strict)
     return model
 
+@ torch.no_grad()
 def common_func(checkpoint_name, instance_func, dic = None, test_datasets_by_art = None, title_set = 0):
     if dic is None:
         dic = {}
@@ -279,6 +280,8 @@ def common_func(checkpoint_name, instance_func, dic = None, test_datasets_by_art
             model = instance_func()
             checkpoint = torch.load(path_repeat)
             model.load_state_dict(checkpoint['model_state_dict'])
+            # Added 2024.10.15
+            model.eval()
             for art_idx, article in enumerate(articles):
                 prec, rec, f, _ = model.test(article)
                 print(f'{dataset_idx} {art_idx} : {f}')
@@ -422,7 +425,7 @@ def t_test(dic = None):
     stats.wilcoxon(dic['BERT'], dic['BERT_TITLE2'])
     stats.wilcoxon(dic['BERT_TITLE'], dic['BERT_TITLE2'])
     # BERT
-    dic1 = load_dic('exp/t_test.dic')
+    dic1 = load_dic('exp/t_test_bert.dic')
     # BERT_CRF
     dic2 = load_dic('exp/t_test_crf.dic')
     # CRF
