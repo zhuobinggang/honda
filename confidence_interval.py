@@ -25,7 +25,14 @@ def table2_scores():
 
 
 def table4_scores():
-    pass
+    from t_test_bertsum import load_score_dict
+    dic = load_score_dict('/home/taku/research/honda/exp/t_test_bbc_bertsum_add_modules.json')
+    print(dic.keys())
+    bertsum = dic['bert_vanilla']
+    add_crf = dic['bert_crf_on']
+    add_title = dic['bert_title_on']
+    add_roberta = dic['roberta_vanilla']
+    add_all = dic['roberta-base-title-on-crf-on']
 
 # Done by taku, 2024.10.15
 def record_model_without_title_scores():
@@ -35,3 +42,31 @@ def record_model_without_title_scores():
     from common import save_dic
     save_dic(dic, 'exp/t_test_roberta_crf.dic')
     return dic
+
+
+def bootstrap_test(f_values_model1, f_values_model2, B = 10000):
+    import numpy as np
+    # 计算原始的均值差异
+    original_diff = np.mean(f_values_model1) - np.mean(f_values_model2)
+    # 设置 Bootstrap 参数
+    bootstrap_diffs = []
+    # 进行 Bootstrap 重采样
+    for i in range(B):
+        # 有放回地随机采样两组 f 值
+        sample_model1 = np.random.choice(f_values_model1, size=len(f_values_model1), replace=True)
+        sample_model2 = np.random.choice(f_values_model2, size=len(f_values_model2), replace=True)
+        # 计算每个样本的均值差异
+        diff = np.mean(sample_model1) - np.mean(sample_model2)
+        bootstrap_diffs.append(diff)
+    # 计算差异的 95% 置信区间
+    lower_bound = np.percentile(bootstrap_diffs, 2.5)
+    upper_bound = np.percentile(bootstrap_diffs, 97.5)
+    # 打印置信区间
+    print(f"95% 置信区间: ({lower_bound}, {upper_bound}\noriginal_diff: {original_diff})")
+    # 检验原始差异是否在置信区间之外
+    if 0 < lower_bound or 0 > upper_bound:
+        print("两组 f 值之间的差异显著")
+    else:
+        print("两组 f 值之间的差异不显著")
+
+

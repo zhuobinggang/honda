@@ -281,7 +281,7 @@ def common_func(checkpoint_name, instance_func, dic = None, test_datasets_by_art
             checkpoint = torch.load(path_repeat)
             model.load_state_dict(checkpoint['model_state_dict'])
             # Added 2024.10.15
-            model.eval()
+            # model.eval()
             for art_idx, article in enumerate(articles):
                 prec, rec, f, _ = model.test(article)
                 print(f'{dataset_idx} {art_idx} : {f}')
