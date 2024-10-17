@@ -147,10 +147,12 @@ class Sector_Roberta_Title_Append_Crf(Sector_Roberta_Title_Append):
         out_mlp = self.classifier(out_bert)  # (1, seq_len, 2)
         return out_mlp
     # 和printer.py配合
-    def emphasize(self, item, threshold = 0.5):
+    def get_prob(self, item):
         out_mlp = self.forward(item)  # (1, seq_len, 2)
-        out_mlp = self.crf.decode(out_mlp)[0]
-        res = [True if res > threshold else False for res in out_mlp]
+        return self.crf.decode(out_mlp)[0]
+    def emphasize(self, item, threshold = 0.5):
+        probs = self.get_prob(item)
+        res = [True if res > threshold else False for res in probs]
         return res
     def test(self, ds, requires_ephasize_number = False):
         target_all = []
