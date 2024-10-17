@@ -93,23 +93,39 @@ def bootstrap_mean_confidence_interval_half_range(scores):
     return (upper_bound - lower_bound) / 2
 
 
+def save_score_dict(score_dict):
+    import json
+    from datetime import datetime
+    # 获取当前时间并格式化
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # 在文件名中添加当前时间
+    with open(f'model_outputs/dic_{current_time}.json', 'w') as f:
+        json.dump(score_dict, f)
+
+def load_score_dict(file_path):
+    import json
+    with open(file_path, 'r') as f:
+        return json.load(f)
+
 # TODO: 未完成
 def common_func_token_level(checkpoint_name, instance_func, dic = None, test_datasets_by_art = None, title_set = 0):
     import torch
     from t_test import dataset_5div_article, get_checkpoint_paths
     if dic is None:
         dic = {}
-    dic[checkpoint_name] = []
+    dic[checkpoint_name] = {}
+    for ds_idx in range(5):
+        dic[checkpoint_name][f'ds{ds_idx}'] = {}
+        for rp_idx in range(3):
+            dic[checkpoint_name][f'ds{ds_idx}'][f'rp{rp_idx}'] = []
     if test_datasets_by_art is None:
         test_datasets_by_art = dataset_5div_article(title_set)
     # BERT
     checkpoints = get_checkpoint_paths(checkpoint_name)
-    all_results = []
-    all_labels = []
     for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
-        temp_fs = [] # 3 * 67
-        for path_repeat in paths_dataset:
-            temp_temp_fs = []
+        for repeat_idx, path_repeat in enumerate(paths_dataset):
+            results = []
+            labels = []
             model = instance_func()
             checkpoint = torch.load(path_repeat)
             model.load_state_dict(checkpoint['model_state_dict'])
@@ -117,13 +133,10 @@ def common_func_token_level(checkpoint_name, instance_func, dic = None, test_dat
             # model.eval()
             for art_idx, article in enumerate(articles):
                 for sentence in article:
-                    results = model.emphasize(sentence)
-                prec, rec, f, _ = model.test(article)
-                print(f'{dataset_idx} {art_idx} : {f}')
-                temp_temp_fs.append(f)
-            temp_fs.append(temp_temp_fs)
-        temp_fs = np.array(temp_fs)
-        dic[checkpoint_name] += temp_fs.mean(0).tolist()
+                    results += model.emphasize(sentence)
+                    labels += sentence[1]
+            dic[checkpoint_name][f'ds{dataset_idx}'][f'rp{repeat_idx}'] += results
+    save_score_dict(dic)
     return dic
 
 def cal_prec_rec_f1_v2(results, targets):
@@ -173,3 +186,9 @@ def bootstrap_mean_confidence_interval_token_level(x, y, B=1000, alpha=0.05):
     lower_bound = np.percentile(bootstrap_fs, 100 * (alpha / 2))
     upper_bound = np.percentile(bootstrap_fs, 100 * (1 - alpha / 2))
     return lower_bound, upper_bound, bootstrap_fs
+
+
+
+def roberta_title_append_crf(dic = None):
+    from roberta import Sector_Roberta_Title_Append_Crf
+    return common_func_token_level('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, dic)
