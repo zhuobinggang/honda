@@ -130,3 +130,6 @@ _, p_value = stats.wilcoxon(bertsum_scores, our_scores)
 # >>> p_value
 # 5.542858751971058e-20
 ```
+
+4. 2024.10.29增加，保存bertsum模型输出的所有结果以提供可重复性
+

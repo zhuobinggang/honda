@@ -162,6 +162,14 @@ def common_func_token_level(checkpoint_name, instance_func, dic = None, test_dat
     return dic
 
 def calculate_scores_by_dic(score_dic):
+    results, labels = result_dic_to_xy(score_dic)
+    fscores = []
+    for i in range(3):
+        _, _, f, _ = cal_prec_rec_f1_v2(results[i], labels)
+        fscores.append(f)
+    return fscores
+    
+def result_dic_to_xy(result_dic):
     import numpy as np
     label_dic = get_label_dic()
     labels = []
@@ -170,15 +178,9 @@ def calculate_scores_by_dic(score_dic):
     results = [[],[],[]]
     for ds_idx in range(5):
         for rp_idx in range(3):
-            results[rp_idx] += score_dic[f'ds{ds_idx}'][f'rp{rp_idx}']
+            results[rp_idx] += result_dic[f'ds{ds_idx}'][f'rp{rp_idx}']
     results = np.array(results) # (3, 180k)
-    fscores = []
-    for i in range(3):
-        _, _, f, _ = cal_prec_rec_f1_v2(results[i], labels)
-        fscores.append(f)
-    return fscores
-    
-
+    return results, labels # (3, 180k), (180k)
     
 
 def cal_prec_rec_f1_v2(results, targets):
@@ -206,28 +208,37 @@ def cal_prec_rec_f1_v2(results, targets):
     return prec, rec, f1, balanced_acc
 
 
-def bootstrap_mean_confidence_interval_token_level(x, y, B=1000, alpha=0.05):
-    import numpy as np
+def bootstrap_mean_confidence_interval_token_level(x, y, B=10000, alpha=0.05, need_time = False):
+    import cupy as np
+    import time
+    start_time = time.time()
+    from sklearn.metrics import f1_score
+    np.random.seed(42)
     x = np.array(x)
     y = np.array(y)
     # 初始化随机数生成器
-    rng = np.random.default_rng()
     # 样本大小
     n = len(x)
     # 自举样本均值
     bootstrap_fs = np.empty(B)
     for i in range(B):
         # 从原始数据中有放回地抽样
-        idx = rng.choice(n, size=n, replace=True)
+        idx = np.random.choice(n, size=n, replace=True)
         bootstrap_x = x[idx]
         bootstrap_y = y[idx]
-        _, _, f, _ = cal_prec_rec_f1_v2(bootstrap_x, bootstrap_y)
+        f = f1_score(bootstrap_x.get(), bootstrap_y.get())
         # 计算该自举样本的均值
         bootstrap_fs[i] = f
+        print(f'time {i}: {f:.3}')
     # 计算百分位法的置信区间
-    lower_bound = np.percentile(bootstrap_fs, 100 * (alpha / 2))
-    upper_bound = np.percentile(bootstrap_fs, 100 * (1 - alpha / 2))
-    return lower_bound, upper_bound, bootstrap_fs
+    lower_bound = np.percentile(bootstrap_fs, 100 * (alpha / 2)).tolist()
+    upper_bound = np.percentile(bootstrap_fs, 100 * (1 - alpha / 2)).tolist()
+    end_time = time.time()
+    bootstrap_fs = bootstrap_fs.tolist()
+    if need_time:
+        return lower_bound, upper_bound, bootstrap_fs, end_time - start_time
+    else:
+        return lower_bound, upper_bound, bootstrap_fs
 
 def roberta_title_append_crf(dic = None):
     from roberta import Sector_Roberta_Title_Append_Crf
@@ -296,3 +307,56 @@ def run():
 
 def run_ignore():
     roberta()
+
+
+# ==================================================
+
+def normal_models_result_dict_to_xy(path):
+    dic = load_score_dict(path)
+    return result_dic_to_xy(dic)
+
+def bootstrap_from_xy(x, y):
+    lower, upper, fs, time = bootstrap_mean_confidence_interval_token_level(x, y, B = 10000, need_time = True)
+    print(f'计算结束，花费了{time/60:.2}分钟。')
+    return {'lower': lower, 'upper': upper, 'fs': fs}
+
+
+def bootstrap_from_result_dic(json_path, model_name):
+    from common import flatten
+    # our
+    dic = load_score_dict(json_path)[model_name]
+    results, labels = result_dic_to_xy(dic)
+    xs = flatten(results) # 3 * 180k
+    ys = labels * 3 # 3 * 180k
+    return bootstrap_from_xy(xs, ys)
+
+
+# TODO: 通过所有模型的output来计算相应的bootstrap confidence intervals
+def bootstrap_all(final_dic = None):
+    if not final_dic:
+        final_dic = {'our': {}, 'roberta': {}, 'bert': {}, 'bertsum': {}, 'bilstm': {}, 'crf': {}, 'wo_crf': {}, 'wo_title': {}, 'wo_roberta': {}}
+    # our
+    final_dic['our'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/ours_0437.json', 'ROBERTA_TITLE_APPEND_CRF')
+    save_score_dict(final_dic, 'bootstrap_result_dict')
+    final_dic['roberta'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/roberta_398.json', 'ROBERTA')
+    save_score_dict(final_dic, 'bootstrap_result_dict')
+    final_dic['bert'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/bert_362.json', 'NORMAL')
+    save_score_dict(final_dic, 'bootstrap_result_dict')
+    # bertsum
+    from t_test_bertsum import get_xy
+    x,y = get_xy()
+    final_dic['bertsum'] = bootstrap_from_xy(x, y)
+    #
+    final_dic['bilstm'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/bilstm_297.json', 'BILSTM')
+    save_score_dict(final_dic, 'bootstrap_result_dict')
+    # CRF
+    from model_outputs.get_crf_token_level_output import read_pred
+    x, y = read_pred()
+    final_dic['crf'] = bootstrap_from_xy(x, y)
+    #
+    final_dic['wo_crf'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/without_crf_423.json', 'ROBERTA_TITLE_APPEND')
+    save_score_dict(final_dic, 'bootstrap_result_dict')
+    final_dic['wo_title'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/without_title_401.json', 'ROBERTA_CRF')
+    save_score_dict(final_dic, 'bootstrap_result_dict')
+    final_dic['wo_roberta'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/without_roberta_410.json', 'SECTOR_TITLE_APPEND_CRF')
+    save_score_dict(final_dic, 'bootstrap_result_dict')

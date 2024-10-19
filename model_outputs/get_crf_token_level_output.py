@@ -1,13 +1,10 @@
 #記事ごとにf値を出すプログラム
 def read_pred():
   from sklearn.metrics import classification_report
-  f = open('crf.out', 'r')
-
+  f = open('/home/taku/research/honda/model_outputs/crf.out', 'r')
   y_true = []
   y_pred = []
-
   datalist = f.read().splitlines()
-
   for data in datalist:
     list = data.split()
     if 'DOCID' in list[0]:
