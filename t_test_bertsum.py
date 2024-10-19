@@ -31,6 +31,27 @@ def load_score_dict(file_path):
     with open(file_path, 'r') as f:
         return json.load(f)
 
+
+def output_token_level(class_func):
+    scores = [[], [], [], [], []]  # 用于存储每个fold的分数
+    article_count_by_fold = [0, 0, 0, 0, 0]
+    for fold_index in range(5):
+        test_set = get_test_set(fold_index)
+        article_count_by_fold[fold_index] += len(test_set)
+        for repeat_index in range(3):
+            checkpoint = get_checkpoint(class_func, fold_index, repeat_index)
+            # TODO
+            f1_scores = calculate_f1_scores_by_article(test_set, checkpoint) # size为len(articles)
+            scores[fold_index].append(f1_scores)
+    scores_mean_by_repeat_flatten = []
+    for fold_index, scores_by_fold in enumerate(scores): # size: (3, len(articles))
+        scores_mean_by_repeat = np.array(scores_by_fold)
+        assert scores_mean_by_repeat.shape == (3, article_count_by_fold[fold_index])
+        scores_mean_by_repeat_flatten += scores_mean_by_repeat.mean(axis=0).tolist()
+    scores_mean_by_repeat_flatten = np.array(scores_mean_by_repeat_flatten)  # size为total_articles
+    assert scores_mean_by_repeat_flatten.shape == (sum(article_count_by_fold),)
+    score_dict[class_func.__name__] = scores_mean_by_repeat_flatten.tolist() # size为total_articles
+
 def t_test(classes):
     import numpy as np
     # from main import Sector_2024

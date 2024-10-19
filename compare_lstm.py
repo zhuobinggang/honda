@@ -170,18 +170,18 @@ def run_batch(seed = 10, indexs = range(3), mtype = 0):
             ds_dev = mess_train_dev[-500:]
             if mtype == 0:
                 m = BILSTM()
-                train_and_save_checkpoints(m, f'BILSTM_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+                train_and_save_checkpoints(m, f'BILSTM_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 12000)
             elif mtype == 1:
                 print('BILSTM_TITLE')
                 m = BILSTM_TITLE()
-                train_and_save_checkpoints(m, f'BILSTM_TITLE_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+                train_and_save_checkpoints(m, f'BILSTM_TITLE_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 12000)
             elif mtype == 2:
                 print('BILSTM_TITLE_CRF')
                 m = BILSTM_TITLE_CRF()
-                train_and_save_checkpoints(m, f'BILSTM_TITLE_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 30000)
+                train_and_save_checkpoints(m, f'BILSTM_TITLE_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 12000)
 
 def script():
     run_batch(mtype = 0) # BILSTM
-    run_batch(mtype = 1) # BILSTM + TITLE
-    run_batch(mtype = 2) # BILSTM + TITLE + CRF
+    # run_batch(mtype = 1) # BILSTM + TITLE
+    # run_batch(mtype = 2) # BILSTM + TITLE + CRF
 
