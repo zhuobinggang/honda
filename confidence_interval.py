@@ -257,7 +257,7 @@ def test_until(name, instance_func, paper_mean, max_try = 10):
         if delta < min_delta:
             min_delta = delta
             print(f'mean delta UPDATED: {min_delta}')
-        if (delta < 0.0007):
+        if (delta < 0.0005):
             print(f'I GOT IT {mean}')
             break
     return min_delta
@@ -278,6 +278,11 @@ def bilstm():
     from compare_lstm import BILSTM
     return test_until('BILSTM', BILSTM, 0.297, max_try= 1)
 
+def our():
+    from roberta import Sector_Roberta_Title_Append_Crf
+    return test_until('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, 0.437, max_try = 5)
+    # return test_until('BILSTM', BILSTM, 0.297, max_try= 1)
+
 
 # DONE
 def without_crf():
@@ -293,6 +298,10 @@ def without_title():
 def without_roberta():
     from title_as_append import Sector_Title_Append_CRF
     return test_until('SECTOR_TITLE_APPEND_CRF', Sector_Title_Append_CRF, 0.409)
+
+def bilstm_title():
+    from compare_lstm import BILSTM_TITLE
+    return test_until('BILSTM_TITLE', BILSTM_TITLE, 0.314)
 
 
 def run():
@@ -336,7 +345,7 @@ def bootstrap_all(final_dic = None):
     if not final_dic:
         final_dic = {'our': {}, 'roberta': {}, 'bert': {}, 'bertsum': {}, 'bilstm': {}, 'crf': {}, 'wo_crf': {}, 'wo_title': {}, 'wo_roberta': {}}
     # our
-    final_dic['our'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/ours_0437.json', 'ROBERTA_TITLE_APPEND_CRF')
+    final_dic['our'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/ours_436.json', 'ROBERTA_TITLE_APPEND_CRF')
     save_score_dict(final_dic, 'bootstrap_result_dict')
     final_dic['roberta'] = bootstrap_from_result_dic('/home/taku/research/honda/model_outputs/roberta_398.json', 'ROBERTA')
     save_score_dict(final_dic, 'bootstrap_result_dict')
