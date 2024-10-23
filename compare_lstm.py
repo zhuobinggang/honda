@@ -46,7 +46,7 @@ class BILSTM(nn.Module):
     def emphasize(self, item):
         out_mlp = self.forward(item)  # (seq_len)
         out_mlp = out_mlp.tolist()
-        res = [True if res > 0.5 else False for res in out_mlp]
+        res = [1 if res > 0.5 else 0 for res in out_mlp]
         return res
     def test(self, ds):
         target_all = []
@@ -181,7 +181,7 @@ def run_batch(seed = 10, indexs = range(3), mtype = 0):
                 train_and_save_checkpoints(m, f'BILSTM_TITLE_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 12000)
 
 def script():
-    run_batch(mtype = 0) # BILSTM
-    # run_batch(mtype = 1) # BILSTM + TITLE
+    # run_batch(mtype = 0) # BILSTM
+    run_batch(mtype = 1) # BILSTM + TITLE
     # run_batch(mtype = 2) # BILSTM + TITLE + CRF
 

@@ -300,7 +300,7 @@ def roberta_title(dic = None):
     from roberta import Sector_Roberta_Title
     return common_func('ROBERTA_TITLE', Sector_Roberta_Title, dic)
 
-def roberta_title_crf(dic = None):
+def roberta_title_crf(dic = None): # new title style
     from roberta import Sector_Roberta_Title_Crf
     return common_func('ROBERTA_TITLE_CRF', Sector_Roberta_Title_Crf, dic)
 

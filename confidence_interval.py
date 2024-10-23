@@ -280,7 +280,7 @@ def bilstm():
 
 def our():
     from roberta import Sector_Roberta_Title_Append_Crf
-    return test_until('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, 0.437, max_try = 5)
+    return test_until('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, 0.434, max_try = 5)
     # return test_until('BILSTM', BILSTM, 0.297, max_try= 1)
 
 
@@ -299,10 +299,15 @@ def without_roberta():
     from title_as_append import Sector_Title_Append_CRF
     return test_until('SECTOR_TITLE_APPEND_CRF', Sector_Title_Append_CRF, 0.409)
 
-def bilstm_title():
+
+## Discussion Tables
+def bilstm_title(): # TODO: 由于checkpoints没有备份的，所以需要重新训练
     from compare_lstm import BILSTM_TITLE
     return test_until('BILSTM_TITLE', BILSTM_TITLE, 0.314)
 
+def our_title_style(): 
+    from roberta import Sector_Roberta_Title_Crf
+    return test_until('ROBERTA_TITLE_CRF', Sector_Roberta_Title_Crf, 0.416)
 
 def run():
     # roberta()

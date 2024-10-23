@@ -224,14 +224,15 @@ def run_batch(seed = 10, indexs = range(3), mtype = 0):
                 train_and_save_checkpoints(m, f'ROBERTA_CRF_RP{repeat}_DS{idx}', ds_train, ds_dev, ds_test, check_step = 300, total_step = 3000)
 
 def run_all_1():
-    run_batch(mtype = 0)
-    run_batch(mtype = 1)
-    run_batch(mtype = 2)
+    # run_batch(mtype = 0)
+    # run_batch(mtype = 1)
+    run_batch(mtype = 2) # new title style
 
 def run_all_2():
+    pass
     # run_batch(mtype = 3)
     # run_batch(mtype = 4)
-    run_batch(mtype = 5)
+    # run_batch(mtype = 5)
 
 ##################### NOTE: 使用chatgpt生成的标题 ######################
 # mtype: 4 = RoBERTa + Generated TITLE + CRF
