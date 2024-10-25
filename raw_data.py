@@ -119,12 +119,16 @@ def titles_raw():
 @lru_cache(maxsize=None)
 def case_id_to_title(idx, title_set = 0):
     sents_with_meta = get_sents_with_meta()
+    sent, (article_idx, relative_sent_idx) = sents_with_meta[idx]
     if title_set == 0:
         titles = titles_raw()
+        return titles[article_idx]
     elif title_set == 1:
         titles = get_all_chatgpt_titles()
-    sent, (article_idx, relative_sent_idx) = sents_with_meta[idx]
-    return titles[article_idx]
+        return titles[article_idx]
+    elif title_set == 2: # 空title
+        return ''
+
 
 #################### NOTE: chatgpt生成的title ##################3
 

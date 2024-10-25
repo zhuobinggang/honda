@@ -138,7 +138,18 @@ def common_func_token_level(checkpoint_name, instance_func, dic = None, test_dat
     from t_test import dataset_5div_article, get_checkpoint_paths
     dic = init_result_dic(checkpoint_name, dic)
     if test_datasets_by_art is None:
-        test_datasets_by_art = dataset_5div_article(title_set)
+        if title_set in [0, 1]:
+            test_datasets_by_art = dataset_5div_article(title_set) # 对于titleset=2的情况有bug，不要用了
+        elif title_set == 2:
+            print('Set title to empty myself')
+            test_datasets_by_art = dataset_5div_article(title_set = 0) # normal title
+            for ds_idx in range(5):
+                arts = test_datasets_by_art[ds_idx]
+                for art_idx, art in enumerate(arts):
+                    for sent_idx, sent in enumerate(art):
+                        test_datasets_by_art[ds_idx][art_idx][sent_idx] = sent[:-1] + ('',)
+        print('please check title: ')
+        print(test_datasets_by_art[0][0][0][-1])
     # BERT
     checkpoints = get_checkpoint_paths(checkpoint_name)
     for dataset_idx, (paths_dataset, articles) in enumerate(zip(checkpoints, test_datasets_by_art)):
@@ -244,11 +255,11 @@ def roberta_title_append_crf(dic = None):
     from roberta import Sector_Roberta_Title_Append_Crf
     return common_func_token_level('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, dic)
 
-def test_until(name, instance_func, paper_mean, max_try = 10):
+def test_until(name, instance_func, paper_mean, max_try = 10, title_set = 0):
     import numpy as np
     min_delta = 1000
     for i in range(max_try):
-        dic = common_func_token_level(name, instance_func)
+        dic = common_func_token_level(name, instance_func, title_set=title_set)
         fs = calculate_scores_by_dic(dic[name])
         mean = np.mean(fs)
         print('XXXXXXXXXXXXXXXXXXXXXXXX')
@@ -280,7 +291,7 @@ def bilstm():
 
 def our():
     from roberta import Sector_Roberta_Title_Append_Crf
-    return test_until('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, 0.434, max_try = 5)
+    return test_until('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, 0.437, max_try = 5, title_set = 2)
     # return test_until('BILSTM', BILSTM, 0.297, max_try= 1)
 
 
@@ -303,16 +314,29 @@ def without_roberta():
 ## Discussion Tables
 def bilstm_title(): # TODO: 由于checkpoints没有备份的，所以需要重新训练
     from compare_lstm import BILSTM_TITLE
-    return test_until('BILSTM_TITLE', BILSTM_TITLE, 0.314)
+    return test_until('BILSTM_TITLE', BILSTM_TITLE, 0.314, max_try = 1)
 
 def our_title_style(): 
     from roberta import Sector_Roberta_Title_Crf
     return test_until('ROBERTA_TITLE_CRF', Sector_Roberta_Title_Crf, 0.416)
 
+def our_discussion_434(): # Done
+    from roberta import Sector_Roberta_Title_Append_Crf
+    return test_until('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, 0.434, max_try = 5)
+    # return test_until('BILSTM', BILSTM, 0.297, max_try= 1)
+
+def our_discussion_empty_title():
+    from roberta import Sector_Roberta_Title_Append_Crf
+    return test_until('ROBERTA_TITLE_APPEND_CRF', Sector_Roberta_Title_Append_Crf, 0.409, max_try = 5, title_set=2)
+    # return test_until('BILSTM', BILSTM, 0.297, max_try= 1)
+
+
+
 def run():
     # roberta()
     # bert()
-    bilstm()
+    # bilstm()
+    our_discussion_empty_title()
     import os
     os.system('spd-say "your program has finished"')
     # without_crf()
